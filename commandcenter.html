@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="AI-Powered DevOps dashboard with live metrics and insights.">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="AI-Powered DevOps Command Center">
+  <meta property="og:description" content="Live metrics, insights, and predictive analytics.">
+  <meta property="og:image" content="/og.png">
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+  <!-- Security Headers (kept permissive for single-file inline JS/CSS) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  
+  <title>Brandon Pippert · AI-Powered DevOps Dashboard</title>
+  
+  <style>
+    :root{
+      --bg:#ffffff;--text:#111827;--muted:#6b7280;--brand:#2563eb;--brand-ink:#1e3a8a;--card:#f9fafb;--line:#e5e7eb;--chip:#eff6ff;
+      --leading:1.6;--accent:#2563eb;--success:#10b981;--warning:#f59e0b;--error:#ef4444;--ai:#7c3aed;
+    }
+    [data-theme="dark"]{
+      --bg:#0f172a;--text:#f1f5f9;--muted:#94a3b8;--brand:#3b82f6;--brand-ink:#1e40af;--card:#1e293b;--line:#3a4a63;--chip:#1e40af;
+      --success:#34d399;--warning:#fbbf24;--error:#f87171;--ai:#a78bfa;
+    }
+    [data-theme="dark"] .heatmap-day { background: #2b2f36; }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      .status-dot.active { animation: none; }
+    }
+    
+    /* Focus styles for accessibility */
+    :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);transition:background-color 0.3s ease, color 0.3s ease;}
+    a{color:var(--brand);text-decoration:none} a:hover{color:var(--brand-ink);text-decoration:none}
+    .container{max-width:1400px;margin:0 auto;padding:24px}
+    
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .brand{font-weight:700;letter-spacing:.2px;display:flex;align-items:center;gap:8px;}
+    .nav{display:flex;gap:14px;align-items:center}
+    .nav a{color:var(--muted);font-weight:600;transition:color .25s ease}
+    .nav a:hover{color:var(--text)}
+    
+    .dashboard-header {text-align:center;margin:3rem 0;}
+    .dashboard-title {font-size:clamp(32px,5vw,48px);font-weight:700;letter-spacing:-0.02em;margin:0.5rem 0;background:linear-gradient(135deg,var(--brand),var(--ai));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .dashboard-subtitle {color:var(--muted);font-size:1.2rem;max-width:600px;margin:0 auto;}
+    
+    .dashboard-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1.5rem;margin-bottom:3rem;}
+    
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,.08);transition:transform .15s ease,box-shadow .2s ease;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--ai));}
+    .card:hover{transform:translateY(-2px);box-shadow:0 28px 80px rgba(0,0,0,.12)}
+    .heavy { content-visibility:auto; contain-intrinsic-size: 600px 400px; }
+    
+    .card-header {display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--line);} 
+    .card-header i {color:var(--brand);font-size:1.25rem;}
+    .card-header h2 {font-size:1.25rem;font-weight:600;margin:0;}
+    
+    .progress-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;}
+    .progress-ring {text-align:center;position:relative;display:flex;flex-direction:column;align-items:center;}
+    .progress-svg {width:100px;height:100px;transform:rotate(-90deg);overflow: visible;}
+    .progress-bg {fill:none;stroke:var(--line);stroke-width:8;}
+    .progress-fill {fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.5s ease;}
+    .progress-value {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;font-weight:700;color:var(--text);} 
+    .progress-label {font-weight:600;color:var(--text);margin-top:0.5rem;}
+    .progress-percent {font-size:0.9rem;color:var(--muted);} 
+    
+    .learning-item {padding:1rem 0;border-bottom:1px solid var(--line);transition:all 0.2s ease;border-radius:8px;padding-left:0.5rem;margin-left:-0.5rem;}
+    .learning-item:hover {background:rgba(59,130,246,0.05);} 
+    .learning-item:last-child {border-bottom:none;} 
+    .learning-date {font-size:0.9rem;color:var(--brand);font-weight:600;margin-bottom:0.5rem;} 
+    .learning-content {color:var(--text);line-height:var(--leading);} 
+    
+    .actions-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;} 
+    .action-btn {display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;background:var(--chip);border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--text);transition:all 0.2s ease;text-align:center;} 
+    .action-btn:hover {background:var(--brand);color:white;border-color:var(--brand);transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,0.3);} 
+    .action-btn i {font-size:1.5rem;} 
+    
+    .stats-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:100%;}
+    .stat-card {text-align:center;padding:1rem;background:rgba(255,255,255,0.03);border-radius:12px;position:relative;overflow:hidden;} 
+    .stat-number {font-size:2rem;font-weight:700;color:var(--brand);margin-bottom:0.25rem;}
+    .stat-label {font-size:0.9rem;color:var(--muted);} 
+    .copy-icon {position:absolute;top:8px;right:8px;cursor:pointer;opacity:.6}
+    .copy-icon:hover{opacity:1}
+    
+    .status-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;} 
+    .status-item {display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:8px;} 
+    .status-dot {width:10px;height:10px;border-radius:50%;background:#10b981;} 
+    .status-dot.active {animation:pulse 2s infinite;} 
+    
+    .bookmarks-grid {display:flex;flex-wrap:wrap;gap:0.5rem;} 
+    .bookmark-chip {display:inline-block;background:var(--chip);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:12px;text-decoration:none;color:var(--text);transition:all 0.2s ease;} 
+    .bookmark-chip:hover {background:var(--brand);color:white;border-color:var(--brand);transform:translateY(-1px);} 
+    
+    .learning-track {display:flex;align-items:center;gap:1rem;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:0.75rem;} 
+    .learning-track:last-child {margin-bottom:0;} 
+    .learning-icon {width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;} 
+    
+    .btn {display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s ease;background:var(--card);color:var(--text);text-decoration:none;} 
+    .btn.primary {background:var(--brand);color:white;border-color:var(--brand);} 
+    .btn.ai {background:var(--ai);color:white;border-color:var(--ai);} 
+    .btn:hover {transform:translateY(-1px);} 
+    .btn.primary:hover {background:var(--brand-ink);} 
+    .btn.ai:hover {background:#6d28d9;} 
+    
+    .full-width {grid-column:1/-1;} 
+    .footer{padding:24px 0;color:var(--muted);font-size:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .theme-toggle{background:none;border:none;color:var(--muted);cursor:pointer;padding:8px;border-radius:8px;transition:all 0.2s ease;} 
+    .theme-toggle:hover{background:var(--card);color:var(--text);} 
+    
+    /* Heatmap Styles */
+    .heatmap-container {margin-top: 1rem;}
+    .heatmap-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;}
+    .heatmap {display: grid; grid-template-columns: repeat(52, 1fr); gap: 3px; margin-bottom: 0.5rem;}
+    .heatmap-day {width: 12px; height: 12px; border-radius: 2px; background: #ebedf0; cursor: pointer; position: relative;}
+    .heatmap-day[data-level="1"] {background: #9be9a8;}
+    .heatmap-day[data-level="2"] {background: #40c463;}
+    .heatmap-day[data-level="3"] {background: #30a14e;}
+    .heatmap-day[data-level="4"] {background: #216e39;}
+    .heatmap-day:hover {border: 1px solid var(--text); transform: scale(1.2);} 
+    .heatmap-legend {display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--muted);} 
+    .heatmap-legend-item {display: flex; align-items: center; gap: 3px;} 
+    .heatmap-tooltip {position: fixed; background: var(--text); color: var(--bg); padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap;} 
+    
+    /* Glow effects */
+    .glow {box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);} 
+    .ai-glow {box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);} 
+    
+    /* Achievement badges */
+    .badges-grid {display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;} 
+    .badge {width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-size: 1.2rem; position: relative;} 
+    .badge::after {content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); z-index: -1; opacity: 0.7;} 
+    .badge.completed {background: linear-gradient(135deg, var(--success), #059669);} 
+    .badge.completed::after {background: linear-gradient(135deg, var(--success), #059669);} 
+    .badge.ai {background: linear-gradient(135deg, var(--ai), #6d28d9);} 
+    .badge.ai::after {background: linear-gradient(135deg, var(--ai), #6d28d9);} 
+    
+    /* Terminal style output */
+    .terminal {background: #1a1b26; color: #a9b1d6; border-radius: 8px; padding: 1rem; font-family: 'Courier New', monospace; font-size: 0.9rem; overflow: auto; max-height: 200px;}
+    .terminal-line {margin-bottom: 0.25rem;}
+    .terminal-prompt {color: #7dcfff;}
+    .terminal-command {color: #9ece6a;}
+    .terminal-output {color: #c0caf5;}
+    
+    /* Sparkline charts */
+    .sparkline {height: 40px; display: flex; align-items: flex-end; gap: 2px; margin-top: 0.5rem;} 
+    .sparkline-bar {background: var(--brand); border-radius: 1px; flex: 1; min-height: 3px;} 
+    
+    /* AI Assistant */
+    .ai-assistant {position: fixed; bottom: 20px; right: 20px; z-index: 1000;}
+    .ai-toggle {position:relative;width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--ai), #6d28d9); border: none; color: white; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;}
+    .ai-toggle:hover {transform: scale(1.1); box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);} 
+    .ai-unread {position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:#ef4444;display:none;}
+    .ai-panel {position: absolute; bottom: 70px; right: 0; width: 350px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.2); padding: 1.5rem; display: none;}
+    .ai-panel.show {display: block; animation: slideUp 0.3s ease;} 
+    .ai-header {display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--line);} 
+    .ai-messages {max-height: 300px; overflow-y: auto; margin-bottom: 1rem;} 
+    .ai-message {padding: 0.75rem; border-radius: 12px; margin-bottom: 0.75rem; max-width: 85%;} 
+    .ai-message.user {background: var(--brand); color: white; margin-left: auto;} 
+    .ai-message.bot {background: var(--chip); color: var(--text);} 
+    .ai-input {display: flex; gap: 0.5rem;} 
+    .ai-input input {flex: 1; padding: 0.75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text);} 
+    
+    /* AI Recommendations */
+    .ai-recommendation {padding: 1rem; background: rgba(124, 58, 237, 0.05); border-radius: 12px; margin-bottom: 1rem; border-left: 4px solid var(--ai);} 
+    .ai-recommendation:last-child {margin-bottom: 0;} 
+    .ai-recommendation h4 {margin: 0 0 0.5rem 0; color: var(--ai);} 
+    .ai-recommendation p {margin: 0; font-size: 0.9rem;} 
+    
+    /* Breathing Text Animation */
+    .breathe-text {
+        font-family: 'Pacifico', cursive;
+        font-size: 3rem;
+        background: linear-gradient(45deg, var(--brand), var(--ai));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding: 10px;
+        animation: breatheWave 8s infinite ease-in-out;
+        text-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.2));
+        pointer-events: none;
+        background-color: transparent !important;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    @keyframes breatheWave {
+        0%, 100% {
+            transform: 
+                perspective(400px)
+                rotateX(4deg)
+                rotateY(0deg)
+                rotateZ(-0.5deg)
+                scale(1);
+            letter-spacing: 2px;
+            background-position: 0% 50%;
+        }
+        25% {
+            transform: 
+                perspective(400px)
+                rotateX(6deg)
+                rotateY(2deg)
+                rotateZ(-1deg)
+                scale(1.03);
+            letter-spacing: 3px;
+            background-position: 25% 50%;
+        }
+        50% {
+            transform: 
+                perspective(400px)
+                rotateX(4deg)
+                rotateY(0deg)
+                rotateZ(0.5deg)
+                scale(1.05);
+            letter-spacing: 4px;
+            background-position: 50% 50%;
+        }
+        75% {
+            transform: 
+                perspective(400px)
+                rotateX(6deg)
+                rotateY(-2deg)
+                rotateZ(1deg)
+                scale(1.03);
+            letter-spacing: 3px;
+            background-position: 75% 50%;
+        }
+    }
+
+    /* Breathing Orb Styles */
+    .breath-container {width: 100%;height: 380px;position: relative;border-radius: 16px;overflow: hidden;background: var(--card);border: 1px solid var(--line);display: flex;flex-direction: column;align-items: center;margin-top: 0;}
+    .orb-container {width: 180px;height: 180px;margin: 10px 0 20px;position: relative;display: flex;justify-content: center;align-items: center;}
+    .glowing-orb {width: 80px;height: 80px;background: linear-gradient(135deg, var(--brand), var(--ai));border-radius: 50%;transition: all 2.4s cubic-bezier(0.33, 1, 0.68, 1);box-shadow: 0 0 15px 3px rgba(37, 99, 235, 0.2), 0 0 30px 6px rgba(124, 58, 237, 0.1), inset 0 4px 15px rgba(255, 255, 255, 0.3);position: relative;z-index: 2;transform: scale(0.8);will-change: transform, box-shadow, background, filter;filter: brightness(1);} 
+    .breath-instruction {font-size: 1.3rem;color: var(--text);font-weight: 500;text-transform: uppercase;letter-spacing: 1.5px;margin-bottom: 10px;transition: opacity 0.8s ease, transform 2.4s cubic-bezier(0.33, 1, 0.68, 1);display: flex;flex-direction: column;align-items: center;} 
+    .breath-countdown {font-size: 2.2rem;font-weight: 500;margin-top: 5px;color: var(--text);min-height: 40px;min-width: 40px;text-align: center;transition: transform 0.3s ease;} 
+    .breath-controls {position: absolute;top: 15px;left: 15px;display: flex;gap: 10px;z-index: 3;} 
+    .breath-mute-btn, .breath-pause-btn {background: none;border: none;color: var(--muted);font-size: 18px;cursor: pointer;transition: all 0.3s;width: 32px;height: 32px;border-radius: 50%;display: flex;align-items: center;justify-content:center;background: rgba(255,255,255,0.1);} 
+    .breath-mute-btn:hover, .breath-pause-btn:hover {color: var(--text);background: rgba(255,255,255,0.2);transform: scale(1.1);} 
+    .glow-pulse {position: absolute;width: 80px;height: 80px;background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0) 70%);border-radius: 50%;opacity: 0;transition: all 2.4s cubic-bezier(0.33, 1, 0.68, 1);z-index: 1;transform-origin: center;will-change: transform, opacity;pointer-events: none;} 
+    .breath-volume-control {position: absolute;bottom: 18px;left: 18px;width: 90px;z-index: 3;opacity: 0.7;transition: opacity 0.3s ease;} 
+    .breath-volume-control:hover {opacity: 1;} 
+    .breath-volume-control input {width: 100%;cursor: pointer;accent-color: var(--brand);} 
+    .breath-watermark {position: absolute;bottom: 20px;right: 18px;color: var(--muted);font-size: 0.65rem;font-weight: 300;z-index: 2;} 
+
+    /* Skip to content for accessibility */
+    .skip-link {position: absolute; top: -40px; left: 6px; background: var(--brand); color: white; padding: 8px; border-radius: 4px; text-decoration: none; z-index: 10000; transition: top 0.3s;}
+    .skip-link:focus {top: 6px;}
+    
+    /* Notes Section */
+    .notes-container {height: 200px;display: flex;flex-direction: column;}
+    .notes-textarea {flex: 1;background: var(--bg);border: 1px solid var(--line);border-radius: 8px;padding: 12px;color: var(--text);font-family: inherit;resize: none;margin-bottom: 10px;}
+    .notes-textarea:focus {outline: none;border-color: var(--brand);} 
+    .notes-actions {display: flex;justify-content: space-between;} 
+    .notes-char-count {font-size: 0.8rem;color: var(--muted);align-self: center;} 
+    
+    @keyframes slideUp {from {transform: translateY(20px); opacity: 0;}to {transform: translateY(0); opacity: 1;}} 
+    @keyframes pulse {0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}} 
+    
+    .toast {position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:var(--bg);padding:12px 20px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.2);transition:all 0.3s ease;z-index:1000;opacity:0;}
+    .toast.show {transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    /* Incidents */
+    .incidents-list{display:grid;gap:12px}
+    .incident {display:grid;grid-template-columns:1fr auto;gap:.5rem;padding:.75rem;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,0.03)}
+    .incident.high {border-left:4px solid var(--error)}
+    .incident.med  {border-left:4px solid var(--warning)}
+    .incident.low  {border-left:4px solid var(--success)}
+    .incident-meta{font-size:.85rem;color:var(--muted)}
+    .incident-actions{display:flex;gap:.5rem;align-items:center}
+    .runbook-btn{border:1px solid var(--line);background:var(--card);padding:.4rem .6rem;border-radius:8px;cursor:pointer;color:var(--text);}
+    .runbook-btn:hover{background:var(--chip);}
+
+    /* Modal (admin gate) */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:saturate(180%) blur(6px);display:none;align-items:center;justify-content:center;z-index:2000}
+    .modal-overlay.show{display:flex;animation:fadeIn .2s ease}
+    .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.25);width:min(92vw,420px);padding:1.25rem}
+    .modal h3{margin:0 0 .75rem 0}
+    .modal .row{display:grid;gap:.5rem;margin:.5rem 0}
+    .modal input{padding:.6rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+    .modal-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    /* Chart containers - FIXED */
+    .chart-container {
+      position: relative;
+      height: 40px;
+      width: 100%;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .slo-chart-container {
+      position: relative;
+      height: 120px;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    @media (max-width:768px){
+      .dashboard-grid{grid-template-columns:1fr;}
+      .progress-grid,.actions-grid,.stats-grid{grid-template-columns:1fr;}
+      .container{padding:1rem;}
+      .heatmap{grid-template-columns: repeat(26, 1fr);}
+      .ai-panel{width: 300px; right: -20px;}
+      .breathe-text{font-size:2.5rem;}
+      .breath-container { height: 320px; }
+    }
+  </style>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <!-- Chart.js for enhanced charts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+  <!-- Skip to content link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header class="container topbar">
+    <div class="brand">
+      <i class="fas fa-robot" style="color: var(--ai);"></i>
+      Brandon Pippert
+    </div>
+    <nav class="nav">
+      <a href="index.html">Portfolio</a>
+      <a href="dashboard.html" style="color:var(--brand);">Dashboard</a>
+      <a href="admin.html">Admin</a>
+      <a href="journey.html">Journey</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66L4.93 19.07M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <main class="container" id="main-content">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">AI-Powered DevOps Command Center</h1>
+      <p class="dashboard-subtitle">Live metrics, intelligent insights, and predictive analytics at a glance</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- AI Insights & Recommendations -->
+      <div class="card full-width ai-glow heavy" data-section="ai-insights">
+        <div class="card-header">
+          <i class="fas fa-robot" style="color: var(--ai);"></i>
+          <h2>AI Insights & Recommendations</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+          <div class="ai-recommendation">
+            <h4><i class="fas fa-lightbulb"></i> Optimization Opportunity</h4>
+            <p>Your Lambda costs could be reduced by 23% by moving from 128MB to 256MB memory, reducing execution time.</p>
+            <button class="btn ai" style="margin-top: 0.5rem; font-size: 0.8rem;">Apply Suggestion</button>
+          </div>
+          <div class="ai-recommendation">
+            <h4><i class="fas fa-shield-alt"></i> Security Recommendation</h4>
+            <p>Consider adding Web Application Firewall to your CloudFront distribution for enhanced security.</p>
+            <button class="btn ai" style="margin-top: 0.5rem; font-size: 0.8rem;">Learn More</button>
+          </div>
+          <div class="ai-recommendation">
+            <h4><i class="fas fa-chart-line"></i> Learning Path Suggestion</h4>
+            <p>Based on your activity, you should focus on Kubernetes networking concepts next.</p>
+            <button class="btn ai" style="margin-top: 0.5rem; font-size: 0.8rem;">View Path</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incidents Timeline -->
+      <div class="card full-width heavy" data-section="incidents">
+        <div class="card-header">
+          <i class="fas fa-radiation"></i>
+          <h2>Incidents</h2>
+        </div>
+        <div id="incidents-list" class="incidents-list"></div>
+      </div>
+
+      <!-- GitHub Activity Heatmap -->
+      <div class="card full-width glow heavy" data-section="heatmap">
+        <div class="card-header">
+          <i class="fab fa-github"></i>
+          <h2>GitHub Activity</h2>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 0.9rem; color: var(--muted);">Last 6 months</span>
+          </div>
+        </div>
+        <div class="heatmap-container">
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heatmap-legend">
+            <span>Less</span>
+            <div class="heatmap-legend-item">
+              <div class="heatmap-day" style="background: #ebedf0;"></div>
+              <div class="heatmap-day" style="background: #9be9a8;"></div>
+              <div class="heatmap-day" style="background: #40c463;"></div>
+              <div class="heatmap-day" style="background: #30a14e;"></div>
+              <div class="heatmap-day" style="background: #216e39;"></div>
+            </div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Skills -->
+      <div class="card heavy" data-section="skills">
+        <div class="card-header">
+          <i class="fas fa-chart-line"></i>
+          <h2>Technical Skills</h2>
+        </div>
+        <div class="progress-grid">
+          <div class="progress-ring">
+            <svg class="progress-svg" viewBox="0 0 36 36">
+              <path class="progress-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="progress-fill" id="aws-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#ff6b00" />
+            </svg>
+            <div class="progress-value">82%</div>
+            <div class="progress-label">AWS</div>
+          </div>
+          <div class="progress-ring">
+            <svg class="progress-svg" viewBox="0 0 36 36">
+              <path class="progress-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="progress-fill" id="linux-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#00b894" />
+            </svg>
+            <div class="progress-value">88%</div>
+            <div class="progress-label">Linux</div>
+          </div>
+          <div class="progress-ring">
+            <svg class="progress-svg" viewBox="0 0 36 36">
+              <path class="progress-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="progress-fill" id="devops-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#0984e3" />
+            </svg>
+            <div class="progress-value">78%</div>
+            <div class="progress-label">DevOps</div>
+          </div>
+          <div class="progress-ring">
+            <svg class="progress-svg" viewBox="0 0 36 36">
+              <path class="progress-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="progress-fill" id="js-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#a29bfe" />
+            </svg>
+            <div class="progress-value">85%</div>
+            <div class="progress-label">JavaScript</div>
+          </div>
+        </div>
+        <div class="badges-grid">
+          <div class="badge completed" title="AWS Cloud Practitioner"><i class="fab fa-aws"></i></div>
+          <div class="badge completed" title="Linux Foundation Certified"><i class="fab fa-linux"></i></div>
+          <div class="badge" title="Kubernetes Certified"><i class="fas fa-ship"></i></div>
+          <div class="badge ai" title="AI-Assisted Learning"><i class="fas fa-robot"></i></div>
+        </div>
+      </div>
+
+      <!-- Weekly Stats with Chart.js - FIXED -->
+      <div class="card heavy" data-section="weekly-stats">
+        <div class="card-header">
+          <i class="fas fa-rocket"></i>
+          <h2>This Week</h2>
+        </div>
+        <div class="stats-grid" style="gap: 0.75rem;">
+          <div class="stat-card" style="padding: 0.75rem;">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#commits-count')"></i>
+            <div class="stat-number" id="commits-count" style="font-size: 1.75rem;">--</div>
+            <div class="stat-label">Git Commits</div>
+            <div class="chart-container">
+              <canvas id="commits-chart"></canvas>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 0.75rem;">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#lambda-invocations')"></i>
+            <div class="stat-number" id="lambda-invocations" style="font-size: 1.75rem;">--</div>
+            <div class="stat-label">Lambda Runs</div>
+            <div class="chart-container">
+              <canvas id="lambda-chart"></canvas>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 0.75rem;">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#learning-hours')"></i>
+            <div class="stat-number" id="learning-hours" style="font-size: 1.75rem;">--</div>
+            <div class="stat-label">Learning Hours</div>
+            <div class="chart-container">
+              <canvas id="learning-chart"></canvas>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 0.75rem;">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#projects-completed')"></i>
+            <div class="stat-number" id="projects-completed" style="font-size: 1.75rem;">--</div>
+            <div class="stat-label">Projects</div>
+            <div class="chart-container">
+              <canvas id="projects-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Deployments -->
+      <div class="card" data-section="deployments">
+        <div class="card-header">
+          <i class="fas fa-rocket"></i>
+          <h2>Recent Deployments</h2>
+        </div>
+        <div id="deployments-list" style="display: grid; gap: 0.75rem;"></div>
+      </div>
+
+      <!-- Feature Flags -->
+      <div class="card" data-section="feature-flags">
+        <div class="card-header">
+          <i class="fas fa-flag"></i>
+          <h2>Feature Flags</h2>
+        </div>
+        <div id="flags-list" style="display:grid;gap:8px"></div>
+      </div>
+
+      <!-- SLOs & Error Budget -->
+      <div class="card" data-section="slos">
+        <div class="card-header"><i class="fas fa-bullseye"></i><h2>SLOs & Error Budget</h2></div>
+        <div id="sloBox" style="display:grid;gap:.5rem"></div>
+        <div class="slo-chart-container">
+          <canvas id="sloChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Learning Journey -->
+      <div class="card" data-section="learning-journey">
+        <div class="card-header">
+          <i class="fas fa-book"></i>
+          <h2>Recent Learning</h2>
+        </div>
+        <div>
+          <div class="learning-item">
+            <div class="learning-date">Oct 5, 2025</div>
+            <div class="learning-content">Added incidents, flags, SLOs, and API keys to DevOps dashboard</div>
+          </div>
+          <div class="learning-item">
+            <div class="learning-date">Oct 3, 2025</div>
+            <div class="learning-content">Built interactive DevOps dashboard with real-time metrics</div>
+          </div>
+          <div class="learning-item">
+            <div class="learning-date">Oct 2, 2025</div>
+            <div class="learning-content">Mastered Lambda Function URLs and CORS configuration</div>
+          </div>
+          <div class="learning-item">
+            <div class="learning-date">Oct 1, 2025</div>
+            <div class="learning-content">Deployed portfolio site on S3 + CloudFront</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Focus Companion - Breathing Only (Timer Removed) -->
+      <div class="card" data-section="focus-companion">
+        <div class="card-header">
+          <i class="fas fa-lungs"></i>
+          <h2>Focus Companion</h2>
+        </div>
+        <div class="breath-container">
+          <div class="breathe-text">breathe</div>
+          <div class="breath-controls">
+            <button class="breath-pause-btn" id="pauseBtn" title="Pause breathing" aria-label="Pause breathing">
+              <i class="fas fa-pause"></i>
+            </button>
+            <button class="breath-mute-btn" id="muteBtn" title="Toggle sound" aria-label="Toggle sound">
+              <i class="fas fa-volume-mute"></i>
+            </button>
+          </div>
+          <div class="orb-container">
+            <div class="glow-pulse" id="pulse1"></div>
+            <div class="glow-pulse" id="pulse2"></div>
+            <div class="glow-pulse" id="pulse3"></div>
+            <div class="glowing-orb" id="orb"></div>
+          </div>
+          <div class="breath-instruction" id="instruction">
+            <span id="phaseText">Breathe in</span>
+            <span class="breath-countdown" id="countdown">4</span>
+          </div>
+          <div class="breath-volume-control">
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.3" aria-label="Breathing volume">
+          </div>
+          <div class="breath-watermark">brandonpippert.dev</div>
+        </div>
+      </div>
+
+      <!-- Infrastructure Health -->
+      <div class="card" data-section="infrastructure-health">
+        <div class="card-header">
+          <i class="fas fa-heart-pulse"></i>
+          <h2>Infrastructure Health</h2>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" style="color: var(--success);" id="cpu-utilization">--</div>
+            <div class="stat-label">CPU Utilization</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: var(--success);" id="memory-usage">--</div>
+            <div class="stat-label">Memory Usage</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: var(--success);" id="disk-io">--</div>
+            <div class="stat-label">Disk I/O</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: var(--success);" id="network-latency">--</div>
+            <div class="stat-label">Network Latency</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card" data-section="quick-actions">
+        <div class="card-header">
+          <i class="fas fa-bolt"></i>
+          <h2>Quick Actions</h2>
+        </div>
+        <div class="actions-grid">
+          <a href="admin.html" class="action-btn" id="adminLink" data-protected="true">
+            <i class="fas fa-cog"></i>
+            <span>Admin Panel</span>
+          </a>
+          <a href="journey.html" class="action-btn">
+            <i class="fas fa-history"></i>
+            <span>Learning Journey</span>
+          </a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="action-btn">
+            <i class="fab fa-github"></i>
+            <span>GitHub</span>
+          </a>
+          <a href="index.html" class="action-btn">
+            <i class="fas fa-home"></i>
+            <span>Portfolio</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- AWS Cost Tracker -->
+      <div class="card" data-section="aws-costs">
+        <div class="card-header">
+          <i class="fas fa-chart-pie"></i>
+          <h2>AWS Costs</h2>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#current-month-cost')"></i>
+            <div class="stat-number" style="color:var(--success);" id="current-month-cost">--</div>
+            <div class="stat-label">This Month</div>
+          </div>
+          <div class="stat-card">
+            <i class="far fa-copy copy-icon" title="Copy" aria-hidden="true" onclick="bpDash.copyText('#last-month-cost')"></i>
+            <div class="stat-number" style="color:var(--warning);" id="last-month-cost">--</div>
+            <div class="stat-label">Last Month</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;font-size:0.9rem;color:var(--muted);text-align:center;" id="cost-change">
+          <i class="fas fa-arrow-down" style="color:var(--success);"></i> Loading...
+        </div>
+        <div class="terminal" id="cost-terminal">
+          <div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-command">aws budgets view --budget-name "Monthly-Spend"</span></div>
+          <div class="terminal-line"><span class="terminal-output">Budget: Monthly-Spend</span></div>
+          <div class="terminal-line"><span class="terminal-output">Status: ON_TRACK</span></div>
+          <div class="terminal-line"><span class="terminal-output">Forecast: $24.50</span></div>
+        </div>
+      </div>
+
+      <!-- Bookmarks with Quick Commands -->
+      <div class="card" data-section="bookmarks">
+        <div class="card-header">
+          <i class="fas fa-bookmark"></i>
+          <h2>Quick Links</h2>
+        </div>
+        <div class="bookmarks-grid">
+          <a href="https://aws.amazon.com/console/" target="_blank" rel="noopener noreferrer" class="bookmark-chip">AWS Console</a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="bookmark-chip">GitHub</a>
+          <a href="https://us-west-1.console.aws.amazon.com/cloudwatch/" target="_blank" rel="noopener noreferrer" class="bookmark-chip">CloudWatch</a>
+          <a href="https://docs.aws.amazon.com/" target="_blank" rel="noopener noreferrer" class="bookmark-chip">AWS Docs</a>
+          <a href="https://console.aws.amazon.com/cost-management/home" target="_blank" rel="noopener noreferrer" class="bookmark-chip">Cost Explorer</a>
+          <a href="https://us-west-1.console.aws.amazon.com/lambda/home" target="_blank" rel="noopener noreferrer" class="bookmark-chip">Lambda</a>
+        </div>
+        
+        <!-- Quick Commands Section -->
+        <div style="margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem;">
+          <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Quick Commands</div>
+          <div class="bookmarks-grid">
+            <button class="bookmark-chip" onclick="bpDash.copyCommand('kubectl get pods')">kubectl get pods</button>
+            <button class="bookmark-chip" onclick="bpDash.copyCommand('docker ps')">docker ps</button>
+            <button class="bookmark-chip" onclick="bpDash.copyCommand('terraform plan')">terraform plan</button>
+            <button class="bookmark-chip" onclick="bpDash.copyCommand('aws s3 ls')">aws s3 ls</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Keys & Webhook Tester -->
+      <div class="card" data-section="api-keys">
+        <div class="card-header"><i class="fas fa-key"></i><h2>API Keys</h2></div>
+        <div id="keys" style="display:grid;gap:.5rem"></div>
+        <button class="btn" onclick="bpDash.createKey()"><i class="fas fa-plus"></i> Create Key</button>
+      </div>
+
+      <div class="card" data-section="webhook-tester">
+        <div class="card-header"><i class="fas fa-plug"></i><h2>Webhook Tester</h2></div>
+        <div style="display:grid;gap:.5rem">
+          <input id="whUrl" placeholder="https://example.com/webhook" class="notes-textarea" style="height:auto" aria-label="Webhook URL">
+          
+          <!-- Payload Preview -->
+          <details style="margin-top: 0.5rem;">
+            <summary style="cursor: pointer; font-size: 0.9rem; color: var(--muted);">Payload Preview</summary>
+            <textarea id="whPayload" class="notes-textarea" style="height: 80px; margin-top: 0.5rem; font-family: monospace; font-size: 0.8rem;" placeholder='{"test": true, "timestamp": "..."}'>{"test": true, "timestamp": "2025-10-05T12:00:00Z", "event": "webhook_test", "source": "devops_dashboard"}</textarea>
+          </details>
+          
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn primary" onclick="bpDash.sendTestWebhook()">Send Test</button>
+            <button class="btn" onclick="bpDash.clearWebhookTerminal()">Clear</button>
+          </div>
+          
+          <div class="terminal" id="webhookTerminal" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </div>
+
+      <!-- Currently Learning -->
+      <div class="card" data-section="currently-learning">
+        <div class="card-header">
+          <i class="fas fa-graduation-cap"></i>
+          <h2>Currently Learning</h2>
+        </div>
+        <div>
+          <div class="learning-track">
+            <div class="learning-icon" style="background:linear-gradient(135deg,#ff6b00,#ff6b00);">
+              <i class="fab fa-aws"></i>
+            </div>
+            <div>
+              <div style="font-weight:600;">AWS Networking</div>
+              <div style="font-size:0.9rem;color:var(--muted);">VPC, Route 53</div>
+            </div>
+          </div>
+          <div class="learning-track">
+            <div class="learning-icon" style="background:linear-gradient(135deg,#00b894,#00b894);">
+              <i class="fab fa-linux"></i>
+            </div>
+            <div>
+              <div style="font-weight:600;">Kubernetes</div>
+              <div style="font-size:0.9rem;color:var(--muted);">Container orchestration</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes Section -->
+      <div class="card" data-section="notes">
+        <div class="card-header">
+          <i class="fas fa-sticky-note"></i>
+          <h2>Quick Notes</h2>
+        </div>
+        <div class="notes-container">
+          <textarea class="notes-textarea" id="notesTextarea" placeholder="Jot down ideas, reminders, or insights..." aria-label="Quick notes"></textarea>
+          <div class="notes-actions">
+            <span class="notes-char-count" id="charCount">0/500</span>
+            <button class="btn primary" onclick="bpDash.saveNote()">Save Note</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Status -->
+      <div class="card full-width" data-section="system-status">
+        <div class="card-header">
+          <i class="fas fa-server"></i>
+          <h2>System Status</h2>
+        </div>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-dot active"></div>
+            <span>Portfolio Site</span>
+            <span style="margin-left:auto;font-size:0.9rem;color:var(--muted);">Operational</span>
+          </div>
+          <div class="status-item">
+            <div class="status-dot active"></div>
+            <span>Learning Journal API</span>
+            <span style="margin-left:auto;font-size:0.9rem;color:var(--muted);">Operational</span>
+          </div>
+          <div class="status-item">
+            <div class="status-dot active"></div>
+            <span>Admin Panel</span>
+            <span style="margin-left:auto;font-size:0.9rem;color:var(--muted);">Operational</span>
+          </div>
+          <div class="status-item">
+            <div class="status-dot active"></div>
+            <span>CloudFront CDN</span>
+            <span style="margin-left:auto;font-size:0.9rem;color:var(--muted);">Operational</span>
+          </div>
+        </div>
+        <div style="margin-top:.75rem"><a href="#" onclick="bpDash.showToast('Public status page coming soon')">Open public status page</a></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- AI Assistant -->
+  <div class="ai-assistant">
+    <div class="ai-panel" id="aiPanel">
+      <div class="ai-header">
+        <i class="fas fa-robot" style="color: var(--ai);"></i>
+        <h3>DevOps AI Assistant</h3>
+      </div>
+      <div class="ai-messages" id="aiMessages" aria-live="polite" aria-atomic="true">
+        <div class="ai-message bot">
+          Hi! I'm your DevOps AI assistant. I can help analyze your AWS costs, suggest optimizations, and answer DevOps questions.
+        </div>
+      </div>
+      <div class="ai-input">
+        <input type="text" id="aiInput" placeholder="Ask about cost optimization..." aria-label="Ask AI assistant">
+        <button class="btn ai" onclick="bpDash.sendAIMessage()" aria-label="Send message">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+    <button class="ai-toggle" id="aiToggle" aria-controls="aiPanel" aria-expanded="false" aria-label="Open AI assistant">
+      <span class="ai-unread" id="aiUnread"></span>
+      <i class="fas fa-robot"></i>
+    </button>
+  </div>
+
+  <!-- Admin Auth Modal -->
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-hidden="true">
+    <div class="modal">
+      <h3 id="authTitle">Enter Admin Passphrase</h3>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:.5rem">This protects the admin page in demos. (Set your pass via <code>localStorage</code>.)</p>
+      <div class="row">
+        <label for="adminPassInput" style="font-size:.9rem;color:var(--muted)">Passphrase</label>
+        <input id="adminPassInput" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="authCancelBtn">Cancel</button>
+        <button class="btn primary" id="authSubmitBtn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div class="modal-overlay" id="shortcutsModal" role="dialog" aria-modal="true" aria-labelledby="shortcutsTitle" aria-hidden="true">
+    <div class="modal">
+      <h3 id="shortcutsTitle">Keyboard Shortcuts</h3>
+      <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div><kbd>Space</kbd></div>
+          <div>Start focus timer</div>
+          <div><kbd>Esc</kbd></div>
+          <div>Close AI assistant</div>
+          <div><kbd>?</kbd></div>
+          <div>Show this help</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="document.getElementById('shortcutsModal').classList.remove('show')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="container footer">
+    <div>© <span id="year">2025</span> Brandon Pippert</div>
+    <div>AI-Powered DevOps Dashboard · Built on AWS</div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // Namespace everything to avoid globals
+    window.bpDash = (function() {
+      'use strict';
+      
+      // State management with versioning
+      const STATE_KEY = 'bp_dash_v1';
+      
+      // Single tooltip instance
+      const tooltip = document.body.appendChild(Object.assign(document.createElement('div'), { className: 'heatmap-tooltip' }));
+      
+      function showTooltip(e, text) {
+        const rect = e.target.getBoundingClientRect();
+        tooltip.textContent = text;
+        tooltip.style.left = `${rect.left + window.scrollX}px`;
+        tooltip.style.top  = `${rect.top  + window.scrollY - 30}px`;
+        tooltip.style.opacity = '1';
+      }
+      function hideTooltip() { tooltip.style.opacity = '0'; }
+      
+      // Toast helper
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+      
+      // Clipboard helper
+      async function copyText(selector){
+        try{
+          const el = document.querySelector(selector);
+          await navigator.clipboard.writeText(el.textContent.trim());
+          showToast('Copied to clipboard');
+        }catch(e){ showToast('Copy failed'); }
+      }
+
+      // Quick commands copy helper
+      async function copyCommand(command) {
+        try {
+          await navigator.clipboard.writeText(command);
+          showToast(`Copied: ${command}`);
+        } catch(e) { 
+          showToast('Copy failed'); 
+        }
+      }
+      
+      // Theme management
+      function initTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const savedState = getStoredState();
+        const savedTheme = savedState?.theme || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle?.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          saveToState({ theme: newTheme });
+        });
+      }
+      
+      // State persistence
+      function getStoredState() {
+        try { return JSON.parse(localStorage.getItem(STATE_KEY)) || {}; } catch { return {}; }
+      }
+      function saveToState(updates) {
+        try {
+          const current = getStoredState();
+          localStorage.setItem(STATE_KEY, JSON.stringify({ ...current, ...updates }));
+        } catch (e) { console.warn('Could not save state:', e); }
+      }
+      
+      // Progress circles using SVG
+      function initProgressCircles() {
+        const skills = [
+          { id: 'aws-progress', percent: 82 },
+          { id: 'linux-progress', percent: 88 },
+          { id: 'devops-progress', percent: 78 },
+          { id: 'js-progress', percent: 85 }
+        ];
+        skills.forEach(skill => {
+          const circle = document.getElementById(skill.id);
+          if (circle) {
+            const radius = 15.9155;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (skill.percent / 100) * circumference;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset;
+          }
+        });
+      }
+      
+      // Breathing Orb functionality with robust pause
+      function initBreathingOrb() {
+        // DOM Elements
+        const orb = document.getElementById('orb');
+        const pulse1 = document.getElementById('pulse1');
+        const pulse2 = document.getElementById('pulse2');
+        const pulse3 = document.getElementById('pulse3');
+        const instruction = document.getElementById('instruction');
+        const phaseText = document.getElementById('phaseText');
+        const countdown = document.getElementById('countdown');
+        const muteBtn = document.getElementById('muteBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        const settings = { prePhasePause: 500, inhaleDuration: 4000, exhaleDuration: 6000, cycleDuration: 11000 };
+        let currentPhase = 'pre-inhale';
+        let animationId = null; let startTime = null; let isMuted = true; let isPaused = false; let currentVolume = 0.3; let countdownInterval = null; let pausedTime = 0; let pauseStartedAt = null;
+
+        function startCountdown(phase) {
+          clearInterval(countdownInterval);
+          let counter = phase === 'inhale' ? 4 : 6; countdown.textContent = counter;
+          countdownInterval = setInterval(() => {
+            counter--; countdown.textContent = counter > 0 ? counter : '';
+            if (counter <= 0) { clearInterval(countdownInterval); }
+            else { countdown.style.transform = 'scale(1.2)'; setTimeout(() => countdown.style.transform = 'scale(1)', 200); }
+          }, 1000);
+        }
+        function ease(t){ return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2; }
+        function animate(ts) {
+          if (!startTime) startTime = ts; const elapsed = ts - startTime - pausedTime; const cycleTime = elapsed % settings.cycleDuration;
+          if (isPaused) { animationId = requestAnimationFrame(animate); return; }
+          if (cycleTime < settings.prePhasePause) { if (currentPhase !== 'pre-inhale') currentPhase = 'pre-inhale'; }
+          else if (cycleTime < settings.prePhasePause + settings.inhaleDuration) { if (currentPhase !== 'inhale') { currentPhase = 'inhale'; phaseText.textContent = 'Breathe in'; instruction.style.opacity = 0; startCountdown('inhale'); setTimeout(() => instruction.style.opacity = 1, 100); orb.style.boxShadow = '0 0 25px 5px rgba(37, 99, 235, 0.3), 0 0 50px 10px rgba(124, 58, 237, 0.2), inset 0 4px 20px rgba(255, 255, 255, 0.4)'; pulse1.style.width = pulse1.style.height = '80px'; pulse2.style.width = pulse2.style.height = '80px'; pulse3.style.width = pulse3.style.height = '80px'; pulse1.style.opacity = pulse2.style.opacity = pulse3.style.opacity = '0'; }
+            const p = ease((cycleTime - settings.prePhasePause) / settings.inhaleDuration); orb.style.transform = `scale(${0.8 + p * 0.4})`; orb.style.filter = `brightness(${1 + p * 0.2})`; pulse1.style.width = pulse1.style.height = `${80 + p * 120}px`; pulse1.style.opacity = `${0.8 * Math.min(1, p * 1.5)}`; pulse2.style.width = pulse2.style.height = `${80 + p * 180}px`; pulse2.style.opacity = `${0.6 * Math.max(0, p - 0.1)}`; pulse3.style.width = pulse3.style.height = `${80 + p * 240}px`; pulse3.style.opacity = `${0.4 * Math.max(0, p - 0.2)}`; instruction.style.transform = `scale(${1 + p * 0.05})`; }
+          else if (cycleTime < settings.prePhasePause + settings.inhaleDuration + settings.prePhasePause) { if (currentPhase !== 'pre-exhale') currentPhase = 'pre-exhale'; }
+          else { if (currentPhase !== 'exhale') { currentPhase = 'exhale'; phaseText.textContent = 'Breathe out'; instruction.style.opacity = 0; startCountdown('exhale'); setTimeout(() => instruction.style.opacity = 1, 100); orb.style.boxShadow = '0 0 20px 3px rgba(37, 99, 235, 0.2), 0 0 40px 6px rgba(124, 58, 237, 0.1), inset 0 4px 15px rgba(255, 255, 255, 0.3)'; }
+            const p = ease((cycleTime - (settings.prePhasePause + settings.inhaleDuration + settings.prePhasePause)) / settings.exhaleDuration); orb.style.transform = `scale(${1.2 - p * 0.4})`; orb.style.filter = `brightness(${1.2 - p * 0.2})`; pulse1.style.opacity = `${0.8 * (1 - p * 1.2)}`; pulse2.style.opacity = `${0.6 * (1 - Math.min(1, p * 1.5))}`; pulse3.style.opacity = `${0.4 * (1 - Math.min(1, p * 2))}`; instruction.style.transform = `scale(${1.05 - p * 0.05})`; }
+          animationId = requestAnimationFrame(animate);
+        }
+        function togglePause() {
+          isPaused = !isPaused; const icon = pauseBtn.querySelector('i'); icon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+          if (isPaused) { pauseStartedAt = performance.now(); clearInterval(countdownInterval); }
+          else { if (pauseStartedAt) { pausedTime += performance.now() - pauseStartedAt; pauseStartedAt = null; } }
+        }
+        function toggleMute() { isMuted = !isMuted; const icon = muteBtn.querySelector('i'); icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'; }
+        function updateVolume(v) { currentVolume = v; }
+        function startAnimation() { startTime = performance.now(); animationId = requestAnimationFrame(animate); }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(animationId); clearInterval(countdownInterval); } else { if (!isPaused) { startTime = performance.now(); animationId = requestAnimationFrame(animate); } } });
+        muteBtn.addEventListener('click', toggleMute); pauseBtn.addEventListener('click', togglePause); volumeSlider.addEventListener('input', (e) => updateVolume(parseFloat(e.target.value)));
+        startAnimation();
+      }
+      
+      // Notes functionality
+      function initNotes() {
+        const textarea = document.getElementById('notesTextarea');
+        const charCount = document.getElementById('charCount');
+        const savedNote = localStorage.getItem('bp_dash_note');
+        if (savedNote) textarea.value = savedNote;
+        function updateCharCount() {
+          const count = textarea.value.length; charCount.textContent = `${count}/500`;
+          if (count > 490) { charCount.style.color = 'var(--error)'; }
+          else if (count > 450) { charCount.style.color = 'var(--warning)'; }
+          else { charCount.style.color = 'var(--muted)'; }
+        }
+        textarea.addEventListener('input', updateCharCount); updateCharCount();
+      }
+      function saveNote() { const textarea = document.getElementById('notesTextarea'); if (textarea.value.length > 500) { showToast('Note too long! Max 500 characters.'); return; } localStorage.setItem('bp_dash_note', textarea.value); showToast('Note saved!'); }
+      
+      // AI Assistant
+      function initAIAssistant() {
+        const aiToggle = document.getElementById('aiToggle');
+        const aiPanel = document.getElementById('aiPanel');
+        const aiInput = document.getElementById('aiInput');
+        aiToggle.addEventListener('click', () => {
+          const isExpanded = aiPanel.classList.toggle('show'); aiToggle.setAttribute('aria-expanded', isExpanded.toString());
+          if (isExpanded) { document.getElementById('aiUnread').style.display = 'none'; }
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aiPanel.classList.contains('show')) { aiPanel.classList.remove('show'); aiToggle.setAttribute('aria-expanded', 'false'); } });
+        aiInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { sendAIMessage(); } });
+      }
+      async function sendAIMessage() {
+        const input = document.getElementById('aiInput'); const messages = document.getElementById('aiMessages'); const message = input.value.trim(); if (!message) return;
+        const userMessage = document.createElement('div'); userMessage.className = 'ai-message user'; userMessage.textContent = message; messages.appendChild(userMessage); input.value = ''; messages.scrollTop = messages.scrollHeight;
+        const typingIndicator = document.createElement('div'); typingIndicator.className = 'ai-message bot'; typingIndicator.textContent = 'Thinking...'; typingIndicator.id = 'typing-indicator'; messages.appendChild(typingIndicator); messages.scrollTop = messages.scrollHeight;
+        try { const response = await simulateAIResponse(message); document.getElementById('typing-indicator')?.remove(); const botMessage = document.createElement('div'); botMessage.className = 'ai-message bot'; botMessage.textContent = response; messages.appendChild(botMessage); }
+        catch { document.getElementById('typing-indicator')?.remove(); const errorMessage = document.createElement('div'); errorMessage.className = 'ai-message bot'; errorMessage.textContent = 'Sorry, I encountered an error. Please try again.'; messages.appendChild(errorMessage); }
+        messages.scrollTop = messages.scrollHeight;
+      }
+      async function simulateAIResponse(message) {
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+        if (/cost|expensive/i.test(message)) {
+          return 'Based on your current usage, I recommend reviewing Lambda memory settings. Moving from 128MB to 256MB could reduce execution time by ~40% and save ~$12/month.';
+        } else if (/security/i.test(message)) {
+          return 'Consider enabling AWS WAF on CloudFront. It protects against common web exploits and costs about $5/month plus $1 per million requests.';
+        } else if (/learn|study/i.test(message)) {
+          return 'Your foundation looks solid. Double down on container orchestration with ECS/EKS next to align with SRE/DevOps roles.';
+        } else if (/lambda|function/i.test(message)) {
+          return 'You have 52 Lambda invocations this week with 100% success rate. Try provisioned concurrency to minimize cold starts.';
+        } else if (/deploy|rollout|release/i.test(message)) {
+          return 'Your deployment frequency has improved by 15% this month. Consider implementing blue-green deployments for zero-downtime releases. Current lead time: 2.3 hours.';
+        } else {
+          return `I hear you asking about "${message}". I can help with cost optimizations, security, learning paths, and performance tuning. What area do you want to drill into?`;
+        }
+      }
+      
+      // Create charts with Chart.js - FIXED to prevent stretching
+      function createCharts(data) {
+        if (typeof Chart === 'undefined') return;
+        
+        const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        const chartConfig = {
+          type: 'bar',
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { 
+                display: false,
+                grid: { display: false }
+              },
+              y: { 
+                display: false, 
+                beginAtZero: true,
+                grid: { display: false }
+              }
+            },
+            animation: { duration: 1000 },
+            layout: {
+              padding: {
+                left: 2,
+                right: 2,
+                top: 2,
+                bottom: 2
+              }
+            }
+          }
+        };
+
+        // Commits chart
+        new Chart(document.getElementById('commits-chart'), {
+          ...chartConfig,
+          data: {
+            labels: days,
+            datasets: [{
+              data: data.commitTrend,
+              backgroundColor: '#2563eb',
+              borderColor: '#2563eb',
+              borderWidth: 0,
+              borderRadius: 2,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            }]
+          }
+        });
+
+        // Lambda chart
+        new Chart(document.getElementById('lambda-chart'), {
+          ...chartConfig,
+          data: {
+            labels: days,
+            datasets: [{
+              data: data.lambdaTrend,
+              backgroundColor: '#10b981',
+              borderColor: '#10b981',
+              borderWidth: 0,
+              borderRadius: 2,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            }]
+          }
+        });
+
+        // Learning chart
+        new Chart(document.getElementById('learning-chart'), {
+          ...chartConfig,
+          data: {
+            labels: days,
+            datasets: [{
+              data: data.learningTrend,
+              backgroundColor: '#7c3aed',
+              borderColor: '#7c3aed',
+              borderWidth: 0,
+              borderRadius: 2,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            }]
+          }
+        });
+
+        // Projects chart
+        new Chart(document.getElementById('projects-chart'), {
+          ...chartConfig,
+          data: {
+            labels: days,
+            datasets: [{
+              data: data.projectTrend,
+              backgroundColor: '#f59e0b',
+              borderColor: '#f59e0b',
+              borderWidth: 0,
+              borderRadius: 2,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            }]
+          }
+        });
+      }
+      
+      // SLO Chart - FIXED to prevent stretching
+      function createSLOChart() {
+        if (typeof Chart === 'undefined') return;
+        
+        const ctx = document.getElementById('sloChart');
+        if (!ctx) return;
+        
+        // Generate realistic SLO data
+        const days = Array.from({length: 30}, (_, i) => `${i + 1}`);
+        
+        let baseline = 99.8;
+        const availability = Array.from({length: 30}, (_, i) => {
+          const variation = (Math.random() * 0.3) - 0.15;
+          const trend = i > 20 ? -0.02 * (i - 20) : 0;
+          return Math.max(99.0, Math.min(100, baseline + variation + trend));
+        });
+
+        availability[29] = 99.85;
+        
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: days,
+            datasets: [{
+              label: 'Availability %',
+              data: availability,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: '#2563eb',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 2,
+              pointHoverRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `Availability: ${context.parsed.y.toFixed(3)}%`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { 
+                display: false,
+                grid: { display: false }
+              },
+              y: {
+                min: 99.0,
+                max: 100.0,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                },
+                grid: { 
+                  color: 'rgba(255, 255, 255, 0.1)',
+                  drawBorder: false
+                }
+              }
+            },
+            animation: { duration: 1000 },
+            layout: {
+              padding: {
+                left: 5,
+                right: 5,
+                top: 5,
+                bottom: 5
+              }
+            }
+          }
+        });
+      }
+      
+      // Real data integration (mocked)
+      async function fetchMetrics() {
+        try {
+          const response = await simulateAPICall();
+          document.getElementById('commits-count').textContent = response.commits;
+          document.getElementById('lambda-invocations').textContent = response.lambdaInvocations;
+          document.getElementById('learning-hours').textContent = response.learningHours.toFixed(1);
+          document.getElementById('projects-completed').textContent = response.projectsCompleted;
+          document.getElementById('current-month-cost').textContent = `$${response.currentMonthCost}`;
+          document.getElementById('last-month-cost').textContent = `$${response.lastMonthCost}`;
+          const costChange = ((response.lastMonthCost - response.currentMonthCost) / response.lastMonthCost * 100).toFixed(1);
+          const costElement = document.getElementById('cost-change');
+          if (costChange > 0) { costElement.innerHTML = `<i class="fas fa-arrow-down" style="color:var(--success);"></i> ${costChange}% decrease`; }
+          else { costElement.innerHTML = `<i class=\"fas fa-arrow-up\" style=\"color:var(--error);\"></i> ${Math.abs(costChange)}% increase`; }
+          // Use charts instead of sparklines
+          createCharts(response);
+        } catch (error) { console.error('Failed to fetch metrics:', error); showToast('⚠️ Could not load live metrics'); }
+      }
+      async function simulateAPICall() {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        return { commits: 14, lambdaInvocations: 52, learningHours: 9.2, projectsCompleted: 3, currentMonthCost: 18.42, lastMonthCost: 23.17, commitTrend: [3,5,7,2,8,4,6], lambdaTrend: [12,15,8,10,5,9,13], learningTrend: [1.2,1.8,0.9,1.5,2.1,1.3,1.7], projectTrend: [0,1,0,1,0,0,1] };
+      }
+      
+      // GitHub Heatmap (mocked pattern)
+      function generateHeatmap() {
+        const heatmap = document.getElementById('heatmap');
+        const today = new Date(); const startDate = new Date(); startDate.setDate(today.getDate() - 364);
+        const activityData = {}; let currentDate = new Date(startDate);
+        while (currentDate <= today) { const dateStr = currentDate.toISOString().split('T')[0]; const dayOfWeek = currentDate.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; const base = isWeekend ? 0.3 : 0.7; const random = Math.random(); activityData[dateStr] = random < base ? Math.floor(Math.random() * 4) + 1 : 0; currentDate.setDate(currentDate.getDate() + 1); }
+        for (let i = 0; i < 364; i++) { const day = document.createElement('div'); day.className = 'heatmap-day'; const date = new Date(startDate); date.setDate(date.getDate() + i); const dateStr = date.toISOString().split('T')[0]; const level = activityData[dateStr] || 0; if (level > 0) day.setAttribute('data-level', level); day.addEventListener('mouseover', (e) => { showTooltip(e, `${dateStr}: ${level} commits`); }); day.addEventListener('mouseout', hideTooltip); heatmap.appendChild(day); }
+      }
+
+      // Incidents (mock) + AI unread dot
+      function loadIncidents() {
+        const data = [
+          {id:'INC-1042', sev:'high', title:'Healthcheck failed: api.prod', started:'2025-10-05 14:22', status:'open'},
+          {id:'INC-1041', sev:'med',  title:'Elevated 5xx: edge-lb',      started:'2025-10-04 09:10', status:'resolved'}
+        ];
+        const container = document.getElementById('incidents-list'); container.innerHTML = '';
+        let hasOpen = false;
+        data.forEach(inc => {
+          const div = document.createElement('div'); div.className = `incident ${inc.sev}`;
+          div.innerHTML = `
+            <div>
+              <div style="font-weight:600">${inc.title}</div>
+              <div class="incident-meta">${inc.id} · ${inc.started} · ${inc.status}</div>
+            </div>
+            <div class="incident-actions">
+              <button class="runbook-btn" onclick="bpDash.openRunbook('${inc.id}')"><i class="fas fa-book"></i> Runbook</button>
+              <button class="runbook-btn" onclick="bpDash.aiSummarizeIncident('${inc.id}')"><i class="fas fa-robot"></i> AI Summary</button>
+            </div>`;
+          container.appendChild(div);
+          if (inc.status === 'open') hasOpen = true;
+        });
+        if (hasOpen) document.getElementById('aiUnread').style.display = 'block';
+      }
+      function openRunbook(id){ showToast(`Opening runbook for ${id}…`); }
+      async function aiSummarizeIncident(id){ showToast(`Generating AI summary for ${id}…`); const messages = document.getElementById('aiMessages'); const bot = document.createElement('div'); bot.className='ai-message bot'; bot.textContent = `Incident ${id}: probable root cause is cold start + throttling; next step: add provisioned concurrency & circuit breaker.`; messages.appendChild(bot); messages.scrollTop = messages.scrollHeight; }
+
+      // Feature flags (mock)
+      function loadFlags(){
+        const flags=[ {key:'new_pricing', env:'prod', on:true,  desc:'New pricing page rollout'}, {key:'beta_ai', env:'dev',  on:false, desc:'AI Assistant beta'} ];
+        const list=document.getElementById('flags-list'); list.innerHTML='';
+        flags.forEach(f=>{ const row=document.createElement('div'); row.style.display='grid'; row.style.gridTemplateColumns='1fr auto'; row.style.alignItems='center'; row.style.border='1px solid var(--line)'; row.style.borderRadius='8px'; row.style.padding='.6rem .8rem'; row.innerHTML = `
+            <div>
+              <div style="font-weight:600">${f.key} <span style="color:var(--muted)">· ${f.env}</span></div>
+              <div style="font-size:.85rem;color:var(--muted)">${f.desc}</div>
+            </div>
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+              <span>${f.on ? 'On' : 'Off'}</span>
+              <input type="checkbox" ${f.on?'checked':''} onchange="bpDash.toggleFlag('${f.key}','${f.env}',this.checked)">
+            </label>`; list.appendChild(row); });
+      }
+      function toggleFlag(key, env, on){ showToast(`${key} (${env}) → ${on?'On':'Off'}`); }
+
+      // API Keys & Webhook
+      function renderKeys(){ const ks = JSON.parse(localStorage.getItem('bp_keys')||'[]'); const box = document.getElementById('keys'); box.innerHTML=''; ks.forEach(k=>{ const row=document.createElement('div'); row.style.display='grid'; row.style.gridTemplateColumns='1fr auto auto'; row.style.gap='.5rem'; row.innerHTML=`<code style="overflow:hidden;text-overflow:ellipsis">${k.masked}</code><button class="btn" onclick="navigator.clipboard.writeText('${k.plain}').then(()=>bpDash.showToast('Copied!'))"><i class='fas fa-copy'></i> Copy</button><button class="btn" onclick="bpDash.revokeKey('${k.id}')"><i class='fas fa-trash'></i></button>`; box.appendChild(row); }); }
+      function createKey(){ const id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()); const plain = `sk_${id.replace(/-/g,'').slice(0,24)}`; const masked = plain.slice(0,6)+'••••••••••'+plain.slice(-4); const ks = JSON.parse(localStorage.getItem('bp_keys')||'[]'); ks.push({id, plain, masked}); localStorage.setItem('bp_keys', JSON.stringify(ks)); renderKeys(); showToast('API key created'); }
+      function revokeKey(id){ const ks = JSON.parse(localStorage.getItem('bp_keys')||'[]').filter(k=>k.id!==id); localStorage.setItem('bp_keys', JSON.stringify(ks)); renderKeys(); showToast('Revoked'); }
+      
+      // Webhook functions with new features
+      async function sendTestWebhook(){ 
+        const url = document.getElementById('whUrl').value.trim();
+        const payloadTextarea = document.getElementById('whPayload');
+        const payload = payloadTextarea ? payloadTextarea.value : '{"test": true}';
+        const term = document.getElementById('webhookTerminal');
+        
+        if (!url) return showToast('Enter a URL');
+        
+        term.innerHTML += `<div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-command">POST ${url}</span></div>`;
+        term.innerHTML += `<div class="terminal-line"><span class="terminal-output">Payload: ${payload.substring(0, 100)}${payload.length > 100 ? '...' : ''}</span></div>`;
+        
+        await new Promise(r=>setTimeout(r,700)); 
+        term.innerHTML += `<div class='terminal-line'><span class='terminal-output'>200 OK — delivered test payload</span></div>`; 
+        term.scrollTop = term.scrollHeight; 
+      }
+      
+      function clearWebhookTerminal() {
+        const terminal = document.getElementById('webhookTerminal');
+        if (terminal) {
+          terminal.innerHTML = '';
+          showToast('Terminal cleared');
+        }
+      }
+      
+      // SLOs
+      function renderSLO(){ 
+        const sloTarget = 99.9, periodDays = 30; 
+        const achieved = 99.85; 
+        const budget = (100 - sloTarget) * periodDays * 24 * 60; 
+        const burned = ((100 - achieved) * periodDays * 24 * 60); 
+        const remaining = Math.max(0, Math.round(budget - burned)); 
+        const box = document.getElementById('sloBox'); 
+        box.innerHTML = `
+          <div class="stat-card"><div class="stat-number" style="color:var(--brand)">${achieved.toFixed(3)}%</div><div class="stat-label">Availability (last ${periodDays}d)</div></div>
+          <div class="stat-card"><div class="stat-number" style="color:${remaining>0?'var(--success)':'var(--error)'}">${remaining}m</div><div class="stat-label">Error Budget Remaining</div></div>`;
+      }
+
+      // Recent Deployments
+      function loadDeployments() {
+        const deployments = [
+          { id: 'DEP-782', service: 'api-gateway', env: 'prod', status: 'success', time: '2 hours ago', version: 'v1.2.3' },
+          { id: 'DEP-781', service: 'user-service', env: 'staging', status: 'success', time: '5 hours ago', version: 'v2.1.0' },
+          { id: 'DEP-780', service: 'auth-service', env: 'prod', status: 'success', time: '1 day ago', version: 'v1.5.2' },
+          { id: 'DEP-779', service: 'payment-api', env: 'dev', status: 'rolling', time: '2 days ago', version: 'v3.0.1' }
+        ];
+
+        const container = document.getElementById('deployments-list');
+        if (!container) return;
+
+        container.innerHTML = '';
+        deployments.forEach(deploy => {
+          const div = document.createElement('div');
+          div.style.cssText = 'display: grid; grid-template-columns: 1fr auto; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 0.75rem;';
+          
+          const statusColor = deploy.status === 'success' ? 'var(--success)' : 
+                            deploy.status === 'rolling' ? 'var(--warning)' : 'var(--error)';
+          
+          div.innerHTML = `
+            <div>
+              <div style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.7rem; background: var(--chip); color: var(--muted); padding: 0.1rem 0.4rem; border-radius: 4px;">${deploy.env}</span>
+                ${deploy.service}
+              </div>
+              <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem;">
+                ${deploy.version} · ${deploy.time}
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: ${statusColor};"></div>
+              <span style="font-size: 0.8rem; text-transform: capitalize;">${deploy.status}</span>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // Infrastructure Health Metrics
+      function loadInfrastructureHealth() {
+        // Mock infrastructure data
+        const healthData = {
+          cpu: '24%',
+          memory: '67%', 
+          disk: '125 IOPS',
+          network: '42ms'
+        };
+
+        document.getElementById('cpu-utilization').textContent = healthData.cpu;
+        document.getElementById('memory-usage').textContent = healthData.memory;
+        document.getElementById('disk-io').textContent = healthData.disk;
+        document.getElementById('network-latency').textContent = healthData.network;
+      }
+
+      // Keyboard shortcuts help
+      function initKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            document.getElementById('shortcutsModal').classList.add('show');
+          }
+        });
+      }
+
+      // Initialize everything
+      function init() {
+        document.getElementById('year').textContent = new Date().getFullYear();
+        initTheme(); initAIAssistant(); initBreathingOrb(); initNotes(); generateHeatmap(); fetchMetrics(); initProgressCircles();
+        loadIncidents(); loadFlags(); renderKeys(); renderSLO();
+        loadDeployments(); loadInfrastructureHealth(); initKeyboardShortcuts();
+        initAdminProtection();
+        
+        // Initialize charts
+        if (typeof Chart !== 'undefined') {
+          createSLOChart();
+        }
+        
+        Object.assign(window.bpDash, { 
+          openRunbook, 
+          aiSummarizeIncident, 
+          toggleFlag, 
+          createKey, 
+          revokeKey, 
+          sendTestWebhook, 
+          clearWebhookTerminal,
+          showToast, 
+          sendAIMessage, 
+          saveNote, 
+          copyText, 
+          copyCommand 
+        });
+      }
+      
+      // Admin link pseudo-protection (demo only)
+      function initAdminProtection(){
+        const link = document.getElementById('adminLink');
+        const modal = document.getElementById('authModal');
+        const passInput = document.getElementById('adminPassInput');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        const cancelBtn = document.getElementById('authCancelBtn');
+        function open(){ modal.classList.add('show'); modal.removeAttribute('aria-hidden'); passInput.value=''; passInput.focus(); }
+        function close(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+        async function submit(){
+          const expected = localStorage.getItem('bp_admin_pass') || 'letmein';
+          if(passInput.value === expected){
+            close();
+            // Navigate after small delay for UX
+            setTimeout(()=>{ window.location.href = link.getAttribute('href'); }, 50);
+          } else {
+            showToast('Wrong passphrase');
+            passInput.focus();
+          }
+        }
+        link?.addEventListener('click', (e)=>{
+          if(link.dataset.protected==='true'){
+            e.preventDefault(); open();
+          }
+        });
+        submitBtn.addEventListener('click', submit);
+        cancelBtn.addEventListener('click', close);
+        passInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ submit(); } if(e.key==='Escape'){ close(); } });
+      }
+      
+      return { init, sendAIMessage, saveNote, showToast, copyText, copyCommand };
+    })();
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bpDash.init);
+    } else {
+      bpDash.init();
+    }
+  </script>
+</body>
+</html>

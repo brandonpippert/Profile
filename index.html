@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brandon Pippert · DevOps & Cloud Engineering</title>
+  <meta name="description" content="DevOps & Cloud Engineer specializing in AWS, infrastructure as code, and reliable cloud systems. AWS Certified Solutions Architect & DevOps Professional." />
+  
+  <!-- SEO & Social Meta -->
+  <meta property="og:title" content="Brandon Pippert · DevOps & Cloud Engineering" />
+  <meta property="og:description" content="Production-grade AWS infrastructure, IaC, and reliable cloud systems. AWS Solutions Architect & DevOps Professional." />
+  <meta property="og:image" content="https://your-actual-domain.com/og-card.png" />
+  <meta property="og:url" content="https://your-actual-domain.com" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Brandon Pippert · DevOps & Cloud" />
+  <meta name="twitter:description" content="AWS, Infrastructure as Code, and reliable cloud systems." />
+  <meta name="twitter:image" content="https://your-actual-domain.com/og-card.png" />
+  
+  <!-- SEO Meta -->
+  <link rel="canonical" href="https://your-actual-domain.com/" />
+  <meta name="robots" content="index,follow" />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="https://i.imgur.com/akKHyVF.png" as="image" />
+  <link rel="preload" href="https://i.imgur.com/kXeJ1Jq.png" as="image" />
+  <link rel="preload" href="https://i.imgur.com/lL2AQtn.png" as="image" />
+  <link rel="preload" href="https://i.imgur.com/qBIPZdG.png" as="image" />
+  <link rel="preload" href="https://i.imgur.com/N1h9Tkn.jpeg" as="image" />
+  
+  <style>
+    :root{
+      --bg:#ffffff;--text:#111827;--muted:#6b7280;--brand:#2563eb;--brand-ink:#1e3a8a;--card:#f9fafb;--line:#e5e7eb;--chip:#eff6ff;
+      --leading:1.6;
+      --accent:#2563eb; /* blue accent */
+    }
+    [data-theme="dark"]{
+      --bg:#0f172a;--text:#f1f5f9;--muted:#94a3b8;--brand:#3b82f6;--brand-ink:#1e40af;--card:#1e293b;--line:#3a4a63;--chip:#1e40af;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";color:var(--text);background:var(--bg);transition:background-color 0.3s ease, color 0.3s ease;}
+    a{color:var(--brand);text-decoration:none} a:hover{color:var(--brand-ink);text-decoration:none}
+    .container{max-width:1080px;margin:0 auto;padding:24px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .brand{font-weight:700;letter-spacing:.2px}
+    .nav{display:flex;gap:14px;align-items:center}
+    .nav a{color:var(--muted);font-weight:600;transition:color .25s ease}
+    .nav a:hover{color:var(--text)}
+    
+    /* Improved focus states */
+    .nav a:focus-visible,
+    .btn:focus-visible,
+    .theme-toggle:focus-visible {
+      outline:2px solid color-mix(in oklab, var(--accent) 80%, white);
+      outline-offset:3px;
+      border-radius:10px;
+    }
+    
+    .hero{position:relative;overflow:hidden;padding:56px 0 28px 0;display:grid;grid-template-columns:1.1fr .9fr;gap:32px}
+    .glow{position:absolute;inset:-20% -20% auto -20%;aspect-ratio:1/1;background:radial-gradient(closest-side, rgba(37,99,235,.12), transparent 60%);filter:blur(20px);transform:translate3d(0,0,0);pointer-events:none}
+    
+    /* Tightened typography */
+    .h-eyebrow{font-size:12px;font-weight:700;color:var(--brand-ink);letter-spacing:.12em;text-transform:uppercase; text-align: center; }
+    .h-title{font-size:clamp(36px,6vw,64px); letter-spacing:-.02em; line-height:1.05; margin:.25em 0; text-align: center; }
+    /* UPDATED: Center align the hero copy */
+    .h-copy{font-size:18px;color:var(--muted); line-height: var(--leading); text-align: center; max-width: 600px; margin: 0 auto; }
+    .cta-row{display:flex;gap:12px;margin-top:18px; justify-content: center; }
+    .btn{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;transition:all 0.2s ease;}
+    
+    /* Updated primary button with blue accent - fixed flash */
+    .btn.primary{
+      border-color:transparent;
+      color:#fff;
+      background: var(--brand);
+      box-shadow: 0 8px 24px rgba(37,99,235,.35);
+    }
+    .btn.primary:hover{
+      background: var(--brand-ink);
+      transform:translateY(-1px);
+      box-shadow:0 12px 28px rgba(37,99,235,.45);
+    }
+    
+    /* Enhanced cards with depth */
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.08);
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .card:hover{transform:translateY(-2px); box-shadow:0 28px 80px rgba(0,0,0,.12)}
+    
+    .hoverable:hover{transform:translateY(-6px);box-shadow:0 10px 24px rgba(0,0,0,.08)}
+    .section{padding:28px 0;border-top:1px solid var(--line)}
+    
+    /* Updated heading sizes */
+    .section h2{font-size:clamp(22px,3.2vw,28px); letter-spacing:-.01em; margin:0 0 10px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .kicker{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .muted{color:var(--muted); line-height: var(--leading)}
+    .list{margin:0;padding-left:18px}
+    .list li{margin:.4em 0; line-height: var(--leading)}
+    .proj h3{margin:.2em 0;font-size:18px}
+    .footer{padding:24px 0;color:var(--muted);font-size:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .certs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:center}
+    .cert-figure{text-align:center;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px}
+    .cert-image{width:140px;height:140px;object-fit:contain;display:block;margin:0 auto;filter:saturate(1.05)}
+    .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px;margin:4px 6px 0 0}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    
+    /* Profile picture styles */
+    .profile-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--line);
+      flex-shrink: 0;
+    }
+    .profile-text {
+      flex: 1;
+    }
+    
+    /* Project links row - UPDATED TO PILL STYLE */
+    .project-links {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .project-link:hover {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+    }
+    .project-tech {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+    
+    /* Live Notes status indicator */
+    .notes-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(0,0,0,0.1);
+      border-left-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Theme toggle */
+    .theme-toggle{background:none;border:none;color:var(--muted);cursor:pointer;padding:8px;border-radius:8px;transition:all 0.2s ease;}
+    .theme-toggle:hover{background:var(--card);color:var(--text);}
+    
+    /* Terminal */
+    .terminal{background:var(--card);color:var(--text);border-radius:12px;padding:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:14px;overflow:hidden;position:relative;border:1px solid var(--line);}
+    .terminal::before{content:"";position:absolute;top:0;left:0;right:0;height:32px;background:rgba(0,0,0,0.1);}
+    .terminal-content{
+      position:relative;
+      z-index:1;
+      margin-top:32px;
+      min-height:180px; /* Reserve space to reduce CLS */
+    }
+    .terminal-line{display:flex;align-items:center;margin:8px 0;}
+    .terminal-prompt{color:var(--brand-ink);margin-right:8px;}
+    .terminal-cursor{display:inline-block;width:8px;height:18px;background:var(--text);margin-left:4px;animation:blink 1s infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    
+    /* Live metrics */
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px; justify-content: center; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .metric-card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;}
+    .metric-value{
+      font-size:24px;
+      font-weight:700;
+      color:var(--brand);
+      min-height:32px; /* Reserve space to reduce CLS */
+      display:inline-block;
+    }
+    .metric-label{font-size:12px;color:var(--muted);}
+    
+    /* Enhanced card hover */
+    .enhanced-card{transition:all 0.3s ease;}
+    .enhanced-card:hover{transform:translateY(-8px);box-shadow:0 12px 28px rgba(0,0,0,0.12);}
+    
+    /* Launch demo button - Fixed flash with solid colors */
+    .demo-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background: var(--brand);
+      border:none;
+      color:white;
+      padding:12px 20px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      box-shadow:0 4px 14px rgba(37,99,235,0.4);
+      text-decoration: none;
+    }
+    .demo-btn:hover{
+      background: var(--brand-ink);
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(37,99,235,0.6);
+      color: white;
+      text-decoration: none;
+    }
+    .demo-btn:active{transform:translateY(0);}
+    
+    /* Horizontal Scrolling Skills Animation */
+    .skills-scroll-container {
+      overflow: hidden;
+      position: relative;
+      height: 160px;
+      margin-top: 16px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    
+    .skill-line {
+      position: relative;
+      height: 50px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+    
+    .skill-track {
+      display: flex;
+      position: absolute;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    
+    .skill-chip {
+      display: inline-flex;
+      align-items: center;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+    
+    .skill-chip:hover {
+      transform: translateY(-1px) scale(1.015);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+    
+    /* Animation for left scrolling - SIGNIFICANTLY SLOWER */
+    .scroll-left {
+      animation: scroll-left 120s linear infinite;
+    }
+    
+    /* Animation for right scrolling - SIGNIFICANTLY SLOWER */
+    .scroll-right {
+      animation: scroll-right 140s linear infinite;
+    }
+    
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    
+    @keyframes scroll-right {
+      0% {
+        transform: translateX(-50%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+    
+    /* Pause animation on hover */
+    .skills-scroll-container:hover .skill-track {
+      animation-play-state: paused;
+    }
+    
+    /* Gradient fade effect */
+    .skills-scroll-container::before,
+    .skills-scroll-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    
+    .skills-scroll-container::before {
+      left: 0;
+      background: linear-gradient(to right, var(--card) 0%, transparent 100%);
+    }
+    
+    .skills-scroll-container::after {
+      right: 0;
+      background: linear-gradient(to left, var(--card) 0%, transparent 100%);
+    }
+    
+    /* Scroll reveal animation */
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: reveal 0.6s ease forwards;
+      }
+      
+      @keyframes reveal {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    }
+    
+    /* Mobile improvements */
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:1fr}
+      .grid-2{grid-template-columns:1fr}
+      .certs{grid-template-columns:repeat(2,1fr)}
+      .metrics{grid-template-columns:1fr; max-width: 100%;}
+      .skills-scroll-container {
+        height: 140px;
+      }
+      .skill-chip {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+      .profile-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+      }
+      .profile-pic {
+        width: 100px;
+        height: 100px;
+      }
+    }
+    
+    @media (max-width: 680px){
+      .container{ padding:18px; }
+      .grid-3, .grid-2{ gap:12px; }
+      .card{ padding:16px; }
+      .project-links { gap: 6px; }
+      .project-link { padding: 4px 10px; font-size: 11px; }
+      .cta-row { flex-direction: column; align-items: center; }
+    }
+    
+    /* Safe reveal defaults */
+    .reveal{opacity:1;transform:none}
+    
+    /* Toast */
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:10px 14px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:1000;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+  <header class="container topbar">
+    <div class="brand">Brandon Pippert</div>
+    <nav class="nav">
+  <a href="https://brandon-cloud-portfolio.s3.us-west-1.amazonaws.com/commandcenter.html">Command Center</a>
+      <a href="#projects">Projects</a>
+      <a href="https://brandon-cloud-portfolio.s3.us-west-1.amazonaws.com/journey.html" target="_blank" rel="noopener noreferrer">Journey</a>
+      <a href="#bio">Bio</a>
+      <a href="#contact">Contact</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66L4.93 19.07M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="reveal">
+        <div class="h-eyebrow">AWS · DevOps · Reliability</div>
+        <h1 class="h-title">Infrastructure that feels invisible.</h1>
+        <p class="h-copy">Production‑grade, reproducible cloud systems that are clear, fast, and reliable.</p>
+        <div class="cta-row">
+          <!-- Updated View Projects to match Launch Demo style -->
+          <a class="demo-btn" href="#projects">View projects</a>
+          <a class="btn" href="resume/brandon-pippert-resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open resume PDF">Resume</a>
+          <button class="demo-btn" id="demoBtn" aria-label="Launch live demo environment">
+            🚀 Launch Demo
+          </button>
+        </div>
+        
+        <!-- Live metrics -->
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value" id="uptimeMetric">99.95%</div>
+            <div class="metric-label">System Uptime</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="responseMetric">142ms</div>
+            <div class="metric-label">Avg Response</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="deployMetric">12s</div>
+            <div class="metric-label">Deploy Time</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Interactive terminal -->
+      <div class="terminal card reveal">
+        <div class="terminal-content" id="terminalContent" aria-live="polite">
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span>cd cloud-infrastructure/</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">$</span>
+            <span>sam deploy --guided</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">></span>
+            <span>Stack Name: production-stack</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">></span>
+            <span>AWS Region: us-west-1</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">></span>
+            <span>Deploying changes...</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">√</span>
+            <span>Successfully created/updated stack</span>
+            <span class="terminal-cursor"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <h2>Featured work</h2>
+      <p class="muted">Each project is documented, reproducible, and deployable on demand.</p>
+      <div class="grid-3">
+        <article class="proj card enhanced-card reveal">
+          <div class="kicker">Three‑tier app</div>
+          <h3>S3 + CloudFront · API Gateway + Lambda · DynamoDB</h3>
+          
+          <!-- Project links - UPDATED TO PILL STYLE -->
+          <div class="project-links">
+            <a href="#" class="project-link">Repo</a>
+            <a href="#" class="project-link">Docs</a>
+            <a href="#" class="project-link">Diagram</a>
+            <a href="https://wetuh8kr5e.execute-api.us-west-1.amazonaws.com/notes" class="project-link" target="_blank" rel="noopener noreferrer">Live</a>
+          </div>
+          
+          <!-- Architecture details -->
+          <div class="project-tech">
+            IaC: AWS SAM · CI: GitHub Actions · Observability: CloudWatch + X-Ray
+            <br><em>Outcome:</em> Zero-downtime deploys; 12s mean deploy; &lt;150ms p95 API.
+          </div>
+          
+          <p class="muted">Serverless web app with signed asset delivery, REST API, and auto‑scaling. IaC with AWS SAM; CloudWatch dashboards & alarms.</p>
+          
+          <!-- Live Notes status indicator -->
+          <div class="notes-status" id="notesStatus">
+            <div class="spinner"></div>
+            <span>Checking live status...</span>
+          </div>
+          
+          <p><a class="btn" href="https://wetuh8kr5e.execute-api.us-west-1.amazonaws.com/notes" target="_blank" rel="noopener noreferrer">View Live Notes →</a></p>
+        </article>
+
+        <article class="proj card enhanced-card reveal">
+          <div class="kicker">Container platform</div>
+          <h3>ECS Fargate · ALB · RDS (Postgres)</h3>
+          
+          <!-- Project links - UPDATED TO PILL STYLE -->
+          <div class="project-links">
+            <a href="#" class="project-link">Repo</a>
+            <a href="#" class="project-link">Docs</a>
+            <a href="#" class="project-link">Diagram</a>
+          </div>
+          
+          <!-- Architecture details -->
+          <div class="project-tech">
+            IaC: CDK · CI: CodePipeline · Observability: CloudWatch Logs
+            <br><em>Outcome:</em> Blue/green deploys; automated rollbacks; 99.9% uptime.
+          </div>
+          
+          <p class="muted">Blue/green deploys with CodePipeline/CodeBuild; migrations via Flyway; least‑privilege IAM; automated backups with PITR.</p>
+        </article>
+
+        <!-- REPLACED: Observability project with AI-Powered DevOps Command Center -->
+        <article class="proj card enhanced-card reveal">
+          <div class="kicker">AI-Powered Dashboard</div>
+          <h3>DevOps Command Center</h3>
+          
+          <!-- Project links - UPDATED TO PILL STYLE -->
+          <div class="project-links">
+            <a href="https://brandon-cloud-portfolio.s3.us-west-1.amazonaws.com/commandcenter.html" class="project-link">Live App</a>
+            <a href="#" class="project-link">Docs</a>
+            <a href="#" class="project-link">Architecture</a>
+          </div>
+          
+          <!-- Architecture details -->
+          <div class="project-tech">
+            Frontend: HTML/CSS/JS · Hosting: S3 + CloudFront · Features: Real-time metrics, AI insights
+            <br><em>Outcome:</em> Centralized DevOps dashboard with focus tools and productivity analytics.
+          </div>
+          
+          <p class="muted">Interactive dashboard with real-time metrics, GitHub activity tracking, focus timer with breathing orb, and AI-powered insights for DevOps workflow optimization.</p>
+          
+          <p><a class="btn" href="https://brandon-cloud-portfolio.s3.us-west-1.amazonaws.com/commandcenter.html">Open Command Center →</a></p>
+        </article>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <article class="proj card enhanced-card reveal">
+          <div class="kicker">Security</div>
+          <h3>IAM · KMS · WAF</h3>
+          
+          <!-- Project links - UPDATED TO PILL STYLE -->
+          <div class="project-links">
+            <a href="#" class="project-link">Repo</a>
+            <a href="#" class="project-link">Docs</a>
+          </div>
+          
+          <!-- Architecture details -->
+          <div class="project-tech">
+            Tools: IAM, KMS, WAF · Scanning: Security Hub
+            <br><em>Outcome:</em> Zero security incidents; automated key rotation; least privilege.
+          </div>
+          
+          <p class="muted">Centralized secrets, managed key rotation, hardened edges with WAF, and periodic least‑privilege reviews.</p>
+        </article>
+        <article class="proj card enhanced-card reveal">
+          <div class="kicker">Automation</div>
+          <h3>CI/CD · GitHub Actions</h3>
+          
+          <!-- Project links - UPDATED TO PILL STYLE -->
+          <div class="project-links">
+            <a href="#" class="project-link">Repo</a>
+            <a href="#" class="project-link">Docs</a>
+          </div>
+          
+          <!-- Architecture details -->
+          <div class="project-tech">
+            CI: GitHub Actions · Testing: Jest, Cypress · Deployment: SAM/CDK
+            <br><em>Outcome:</em> Push-to-preview environments; 90% test coverage; automated quality gates.
+          </div>
+          
+          <p class="muted">Push‑to‑preview for frontend & backend, test/lint gates, and safe rollbacks.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <h2>DevOps skills</h2>
+      
+      <!-- Horizontal Scrolling Skills -->
+      <div class="skills-scroll-container">
+        <div class="skill-line">
+          <div class="skill-track scroll-left" id="skillLine1">
+            <!-- Skills will be populated by JavaScript -->
+          </div>
+        </div>
+        <div class="skill-line">
+          <div class="skill-track scroll-right" id="skillLine2">
+            <!-- Skills will be populated by JavaScript -->
+          </div>
+        </div>
+        <div class="skill-line">
+          <div class="skill-track scroll-left" id="skillLine3">
+            <!-- Skills will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="certs" class="section">
+      <h2>Certifications</h2>
+      <div class="certs">
+        <figure class="card enhanced-card cert-figure">
+          <img loading="lazy" src="https://i.imgur.com/akKHyVF.png" alt="AWS Certified Cloud Practitioner badge" class="cert-image" width="140" height="140" />
+          <figcaption class="muted" style="margin-top:8px">Cloud Practitioner</figcaption>
+        </figure>
+        <figure class="card enhanced-card cert-figure">
+          <img loading="lazy" src="https://i.imgur.com/lL2AQtn.png" alt="Linux Essentials badge" class="cert-image" width="140" height="140" />
+          <figcaption class="muted" style="margin-top:8px">Linux Essentials</figcaption>
+        </figure>
+        <figure class="card enhanced-card cert-figure">
+          <img loading="lazy" src="https://i.imgur.com/kXeJ1Jq.png" alt="AWS Solutions Architect Associate badge" class="cert-image" width="140" height="140" />
+          <figcaption class="muted" style="margin-top:8px">AWS SAA</figcaption>
+        </figure>
+        <figure class="card enhanced-card cert-figure">
+          <img loading="lazy" src="https://i.imgur.com/qBIPZdG.png" alt="AWS DevOps Engineer Professional badge" class="cert-image" width="140" height="140" />
+          <figcaption class="muted" style="margin-top:8px">DevOps Pro</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="bio" class="section">
+      <h2>Bio</h2>
+      <div class="grid-2">
+        <div>
+          <!-- Profile picture and bio text -->
+          <div class="profile-container">
+            <img src="https://i.imgur.com/N1h9Tkn.jpeg" alt="Brandon Pippert" class="profile-pic" width="120" height="120" />
+            <div class="profile-text">
+              <p>I'm Brandon, a DevOps and cloud engineer who thrives on solving hard problems and keeping systems simple, fast, and reliable. My path into tech was nontraditional, but that taught me persistence and grit. I'm AWS certified, fluent in automation and AI workflows, and focused on building deploy-ready infrastructure that scales.</p>
+              <p>My projects show I can deliver production-grade systems, and my strength is the drive to keep learning and improving every day.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="card">
+          <div class="kicker">Snapshot</div>
+          <ul class="list">
+            <li>AWS Certified: Cloud Practitioner → DevOps Pro</li>
+            <li>Core stack: AWS + GitHub Actions + Terraform</li>
+            <li>Strengths: automation, reliability, observability</li>
+            <li>Mindset: keep it minimal, testable, and maintainable</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section id="resume" class="section">
+      <h2>Resume</h2>
+      <p class="muted">Link your PDF or public doc below.</p>
+      <p><a class="btn" href="resume/brandon-pippert-resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Open resume PDF">Open resume (PDF)</a></p>
+    </section>
+
+    <section id="contact" class="section">
+      <h2>Get in touch</h2>
+      <p class="muted">Want a quick demo or repo link? Ping me and I'll spin up a live environment.</p>
+      <p>Email: <a href="mailto:brandonpippert@gmail.com">brandonpippert@gmail.com</a> <button class="btn" id="copyEmail" style="margin-left:8px">Copy</button></p>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+</main>
+
+  <footer class="container footer">
+    <div>© <span id="year"></span> Brandon Pippert</div>
+    <div>Built on AWS S3 · Designed with intent</div>
+  </footer>
+
+<script>
+  // Critical functionality - loaded immediately
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Global toast function
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // Defer non-critical JS
+  window.addEventListener('DOMContentLoaded', function() {
+    
+    // 1) Enhanced theme switcher with safer icon updates - DEFAULT TO LIGHT THEME
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      // CHANGED: Default to light theme instead of checking system preference
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      
+      // Update toggle icon - rewritten for reliability
+      function updateToggleIcon(theme) {
+        const svg = document.querySelector('#themeToggle svg');
+        if(!svg) return;
+        svg.innerHTML = theme === 'dark'
+          ? '<path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z" fill="currentColor"/>'
+          : '<circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/>' +
+            '<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66L4.93 19.07M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2"/>';
+      }
+      
+      updateToggleIcon(savedTheme);
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateToggleIcon(newTheme);
+      });
+      
+      // CHANGED: Remove system theme change listener since we default to light
+      // Users can still manually switch to dark mode and it will be saved
+    }
+
+    // 2) Interactive terminal with typing effect
+    const terminal = document.getElementById('terminalContent');
+    if (terminal) {
+      const lines = [
+        {text: "git push origin main", delay: 3000},
+        {text: "Triggering deployment pipeline...", delay: 1000},
+        {text: "Running tests... ✓", delay: 1500},
+        {text: "Building container image... ✓", delay: 1500},
+        {text: "Deploying to ECS Fargate... ✓", delay: 2000},
+        {text: "Health check passed! Deployment successful.", delay: 0}
+      ];
+      
+      let lineIndex = 0;
+      
+      function addLine(text, isPrompt = true) {
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        
+        if (isPrompt) {
+          const prompt = document.createElement('span');
+          prompt.className = 'terminal-prompt';
+          prompt.textContent = '$';
+          line.appendChild(prompt);
+        }
+        
+        const content = document.createElement('span');
+        content.textContent = text;
+        line.appendChild(content);
+        
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+      
+      function startTerminalAnimation() {
+        if (lineIndex < lines.length) {
+          const line = lines[lineIndex];
+          setTimeout(() => {
+            addLine(line.text);
+            lineIndex++;
+            startTerminalAnimation();
+          }, line.delay);
+        }
+      }
+      
+      // Start animation when page loads
+      setTimeout(startTerminalAnimation, 2000);
+    }
+
+    // 3) Animated metrics
+    const metrics = {
+      uptime: { element: document.getElementById('uptimeMetric'), target: 99.95, duration: 2000 },
+      response: { element: document.getElementById('responseMetric'), target: 142, duration: 1500 },
+      deploy: { element: document.getElementById('deployMetric'), target: 12, duration: 1000 }
+    };
+    
+    function animateMetric(metric, unit = '') {
+      if (!metric.element) return;
+      const start = 0;
+      const increment = metric.target / (metric.duration / 16);
+      let current = start;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= metric.target) {
+          current = metric.target;
+          clearInterval(timer);
+        }
+        
+        if (unit === '%') {
+          metric.element.textContent = current.toFixed(2) + unit;
+        } else {
+          metric.element.textContent = Math.round(current) + unit;
+        }
+      }, 16);
+    }
+    
+    // Start animation when page loads
+    setTimeout(() => {
+      animateMetric(metrics.uptime, '%');
+      animateMetric(metrics.response, 'ms');
+      animateMetric(metrics.deploy, 's');
+    }, 1000);
+
+    // 4) Copy email with toast
+    const copyBtn = document.getElementById('copyEmail');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const email = 'brandonpippert@gmail.com';
+        navigator.clipboard.writeText(email)
+          .then(() => showToast('Email copied to clipboard!'))
+          .catch(() => showToast('Failed to copy email'));
+      });
+    }
+
+    // 5) Launch demo button
+    const demoBtn = document.getElementById('demoBtn');
+    if (demoBtn) {
+      demoBtn.addEventListener('click', function() {
+        const originalText = this.textContent;
+        this.textContent = '🚀 Launching...';
+        this.disabled = true;
+        
+        // Simulate API call to launch environment
+        setTimeout(() => {
+          showToast('Demo environment launching! Check your email for details.');
+          this.textContent = originalText;
+          this.disabled = false;
+        }, 2000);
+      });
+    }
+
+    // 6) Safe smooth scrolling for same-page anchor links only
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        const id = anchor.getAttribute('href');
+        if (id.length > 1) { // ignore just "#"
+          e.preventDefault();
+          const target = document.querySelector(id);
+          if (target) {
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block:'start' });
+          }
+        }
+      });
+    });
+
+    // 7) Horizontal Scrolling Skills Animation
+    const skillLine1 = document.getElementById('skillLine1');
+    const skillLine2 = document.getElementById('skillLine2');
+    const skillLine3 = document.getElementById('skillLine3');
+    
+    if (skillLine1 && skillLine2 && skillLine3) {
+      // Define skills arrays for each line
+      const skillsLine1 = [
+        "AWS (S3, CloudFront, API GW, Lambda, ECS, RDS, DynamoDB)",
+        "IaC: CDK, SAM, Terraform (basics)",
+        "CI/CD: GitHub Actions, CodePipeline",
+        "Containers: Docker, ECS Fargate",
+        "Observability: CloudWatch, X‑Ray, Synthetics"
+      ];
+      
+      const skillsLine2 = [
+        "Security: IAM, KMS, WAF, Secrets Mgmt",
+        "Networking: VPC, ALB, Route 53",
+        "Languages/Tools: Bash, Python (basics), Git",
+        "Reliability: health checks, alerts, rollbacks",
+        "Serverless Architecture"
+      ];
+      
+      const skillsLine3 = [
+        "Infrastructure as Code",
+        "Cloud Security",
+        "Monitoring & Alerting",
+        "Automation & Scripting",
+        "Cost Optimization",
+        "Disaster Recovery",
+        "Performance Tuning",
+        "Microservices"
+      ];
+      
+      // Function to populate a skill line with duplicates for seamless scrolling
+      function populateSkillLine(lineElement, skills) {
+        // Create two sets of skills for seamless looping
+        for (let set = 0; set < 2; set++) {
+          skills.forEach(skill => {
+            const skillChip = document.createElement('span');
+            skillChip.className = 'skill-chip';
+            skillChip.textContent = skill;
+            lineElement.appendChild(skillChip);
+          });
+        }
+      }
+      
+      // Populate each line
+      populateSkillLine(skillLine1, skillsLine1);
+      populateSkillLine(skillLine2, skillsLine2);
+      populateSkillLine(skillLine3, skillsLine3);
+    }
+
+    // 8) Real Live Notes status check
+    const notesStatus = document.getElementById('notesStatus');
+    if (notesStatus) {
+      // Real HEAD request to check liveness
+      fetch('https://wetuh8kr5e.execute-api.us-west-1.amazonaws.com/notes', { 
+        method: 'HEAD', 
+        mode: 'cors'
+      })
+      .then(r => {
+        notesStatus.innerHTML = r.ok
+          ? '<span style="color: var(--brand)">✓ Live endpoint responsive</span>'
+          : '<span style="color:#ef4444">• Endpoint not responding</span>';
+      })
+      .catch(() => {
+        notesStatus.innerHTML = '<span style="color:#ef4444">• CORS/Network blocked</span>';
+      });
+    }
+
+  }); // End DOMContentLoaded
+</script>
+
+<!-- CloudFront/S3 Deployment Notes:
+  - Set Cache-Control: public, max-age=31536000, immutable for CSS/JS/assets
+  - Set Cache-Control: public, max-age=300 for index.html (5 min)
+  - Configure S3 static hosting + CloudFront + OAC
+  - Compress with gzip/brotli
+  - Add 512x5afd12 favicon.png at root
+  - Create social-preview.png (1200x630) for link sharing
+-->
+</body>
+</html>

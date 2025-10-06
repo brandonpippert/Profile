@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brandon Pippert · DevOps Engineer</title>
+<meta name="description" content="DevOps Engineer specializing in cloud infrastructure, automation, CI/CD pipelines, and Kubernetes" />
+<meta name="theme-color" content="#000000" />
+<link rel="preload" as="image" href="https://i.imgur.com/s44cd43.png">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#ffffff;
+    --muted:#e5e7eb;
+    --line:#e5e7eb;
+    --primary: #1e40af; /* DARKER BLUE - matches portfolio */
+    --primary-dark: #1e3a8a; /* EVEN DARKER ON HOVER */
+    --text-primary: #f9fafb;
+    --background-scale: 1;
+  }
+  
+  /* Light theme variables - KEPT FOR FUTURE USE */
+  [data-theme="light"] {
+    --bg: #f8fafc;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --text-primary: #1e293b;
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+  }
+  
+  *{box-sizing: border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--text-primary);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+    overflow:hidden;
+    position: relative;
+  }
+
+  body.loaded::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: 
+      linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)),
+      url('https://i.imgur.com/s44cd43.png') center/cover no-repeat;
+    opacity: 1;
+    z-index: -2;
+    transform: scale(var(--background-scale));
+    transition: transform 60s linear;
+  }
+
+  #termCanvas{
+    position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;
+    filter: contrast(1.06);
+  }
+
+  #nameParticles{
+    position:fixed; inset:0; width:100%; height:100%; z-index:1; pointer-events:none;
+  }
+
+  .wrap{
+    position:relative; z-index:2;
+    height:100dvh; display:grid; place-items:center; padding:24px;
+  }
+  .hero{ text-align:center; max-width:1000px; margin:0 auto; }
+
+  .title{
+    font-size: clamp(46px, 10vw, 120px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 0 0 20px 0;
+    text-shadow: 0 2px 16px rgba(0,0,0,.5);
+  }
+
+  .subtitle{
+    font-size: clamp(16px, 2.4vw, 22px);
+    color: var(--muted);
+    margin-top: 12px;
+    text-shadow: 0 1px 8px rgba(0,0,0,.4);
+    font-weight: 500;
+  }
+
+  .tech-stack {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tech-badge {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .tech-badge:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .cta-row{
+    display:flex; gap:12px; justify-content:center; margin-top:36px; flex-wrap:wrap;
+  }
+  .btn{
+    appearance:none;
+    background:#fff;
+    color:#000;
+    padding:12px 24px;
+    border-radius: 12px;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:10px;
+    border:1px solid var(--line);
+    transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn:hover,
+  .btn:active{
+    background:#000;
+    color:#fff;
+    border-color:#000;
+    transform: translateY(-2px);
+    box-shadow: 0 18px 50px rgba(0,0,0,.30);
+  }
+  
+  .btn-primary {
+    background: var(--primary); /* Now uses the darker blue */
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.35); /* Matching shadow */
+  }
+  
+  .btn-primary:hover {
+    background: var(--primary-dark); /* Even darker on hover */
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(30, 58, 138, 0.45); /* Enhanced shadow */
+  }
+  
+  .btn:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+  
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Theme Toggle Button - VISIBLE BUT DISABLED */
+  .theme-toggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: not-allowed; /* Changed to indicate disabled */
+    transition: all 0.3s ease;
+    color: white;
+    opacity: 0.6; /* Make it look disabled */
+  }
+
+  .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15); /* No change on hover */
+    transform: none; /* No scale on hover */
+  }
+
+  .theme-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Scroll progress indicator */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), #60a5fa);
+    z-index: 100;
+    transition: width 0.1s ease;
+  }
+
+  @media (max-width: 768px) {
+    .btn {
+      padding: 16px 24px;
+      min-width: 140px;
+      justify-content: center;
+    }
+    
+    .cta-row {
+      gap: 16px;
+    }
+    
+    .wrap {
+      padding: 16px;
+    }
+    
+    .tech-stack {
+      gap: 12px;
+    }
+    
+    .tech-badge {
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+    
+    .theme-toggle {
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .tech-stack {
+      gap: 8px;
+    }
+    
+    .tech-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+    }
+    
+    .title {
+      margin: 0 0 16px 0;
+    }
+    
+    .subtitle {
+      margin-top: 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #termCanvas, #nameParticles { display:none; }
+    .btn {
+      transition: none;
+    }
+    .btn::before {
+      display: none;
+    }
+    body.loaded::before {
+      transition: none;
+    }
+  }
+
+  .no-js-warning {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffeb3b;
+    color: #000;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+  }
+  
+  .no-js .no-js-warning {
+    display: block;
+  }
+  
+  .no-js #termCanvas,
+  .no-js #nameParticles {
+    display: none;
+  }
+  
+  .loader {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), #fff, var(--primary));
+    background-size: 200% 100%;
+    animation: loading 2s infinite;
+    z-index: 9999;
+  }
+  
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  body.loading .loader {
+    display: block;
+  }
+  
+  .status-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  
+  .status-indicator:hover {
+    opacity: 1;
+  }
+  
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="no-js-warning">
+  For the best experience, please enable JavaScript in your browser.
+</div>
+
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Theme Toggle Button - VISIBLE BUT DISABLED -->
+<button class="theme-toggle" id="themeToggle" aria-label="Theme toggle (coming soon)" disabled>
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Moon icon for dark mode (permanently active) -->
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+  </svg>
+</button>
+
+<div class="loader"></div>
+
+<div class="status-indicator" aria-label="Availability: Seeking opportunities">
+  <div class="status-dot"></div>
+  <span>Seeking opportunities</span>
+</div>
+
+<div class="sr-only" id="termDescription">
+  Terminal animation showing DevOps commands and system operations scrolling continuously in the background.
+</div>
+<div class="sr-only" id="particlesDescription">
+  Interactive particle animation that forms the name Brandon Pippert and reacts to mouse movement.
+</div>
+
+<canvas id="termCanvas" 
+        aria-hidden="true" 
+        aria-describedby="termDescription"></canvas>
+<canvas id="nameParticles" 
+        aria-hidden="true" 
+        aria-describedby="particlesDescription"></canvas>
+
+<div class="wrap">
+  <main class="hero" aria-label="Brandon Pippert - DevOps Engineer">
+    <header role="banner">
+      <div class="title-measure" id="titleWrap">
+        <h1 class="title" id="titleText">Brandon Pippert</h1>
+      </div>
+      <div class="subtitle">DevOps & Cloud Engineer</div>
+      
+      <div class="tech-stack">
+        <span class="tech-badge">AWS</span>
+        <span class="tech-badge">Kubernetes</span>
+        <span class="tech-badge">Terraform</span>
+        <span class="tech-badge">Docker</span>
+        <span class="tech-badge">CI/CD</span>
+        <span class="tech-badge">Python</span>
+        <span class="tech-badge">GitLab</span>
+        <span class="tech-badge">Jenkins</span>
+      </div>
+    </header>
+
+    <div class="cta-row">
+      <!-- FIXED: Updated portfolio link to full S3 URL -->
+      <a class="btn btn-primary" href="https://brandon-cloud-portfolio.s3.us-west-1.amazonaws.com/index.html" id="primaryCta">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M21 16V8.00002C20.9996 7.6493 20.9071 7.30483 20.7315 7.00119C20.556 6.69754 20.3037 6.44539 20 6.27002L13 2.27002C12.696 2.09449 12.3511 2.00208 12 2.00208C11.6489 2.00208 11.304 2.09449 11 2.27002L4 6.27002C3.69626 6.44539 3.44398 6.69754 3.26846 7.00119C3.09294 7.30483 3.00036 7.6493 3 8.00002V16C3.00036 16.3508 3.09294 16.6952 3.26846 16.9989C3.44398 17.3025 3.69626 17.5547 4 17.73L11 21.73C11.304 21.9056 11.6489 21.998 12 21.998C12.3511 21.998 12.696 21.9056 13 21.73L20 17.73C20.3037 17.5547 20.556 17.3025 20.7315 16.9989C20.9071 16.6952 20.9996 16.3508 21 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3.27002 6.96002L12 12L20.73 6.96002" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 22.08V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        View Portfolio
+      </a>
+      <!-- FIXED: Updated to actual GitHub profile -->
+      <a class="btn" href="https://github.com/bpippert" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M9 19C4 20.5 4 16.5 2 16M16 22V18.13C16.0375 17.6532 15.9731 17.1738 15.811 16.7238C15.6489 16.2738 15.3929 15.8634 15.06 15.52C18.2 15.17 21.5 13.98 21.5 8.52C21.4997 7.12383 20.9627 5.7812 20 4.77C20.4559 3.54851 20.4236 2.19835 19.91 1C19.91 1 18.73 0.65 16 2.48C13.708 1.85882 11.292 1.85882 9 2.48C6.27 0.65 5.09 1 5.09 1C4.57638 2.19835 4.54414 3.54851 5 4.77C4.03013 5.7887 3.49252 7.14346 3.5 8.55C3.5 13.97 6.8 15.16 9.94 15.55C9.611 15.89 9.35726 16.2954 9.19531 16.7399C9.03335 17.1844 8.96681 17.6581 9 18.13V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        GitHub
+      </a>
+      <!-- FIXED: Updated to actual LinkedIn profile -->
+      <a class="btn" href="https://www.linkedin.com/in/brandonpippert" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 6 C 5.10457 6 6 5.10457 6 4 C 6 2.89543 5.10457 2 4 2 C 2.89543 2 2 2.89543 2 4 C 2 5.10457 2.89543 6 4 6 Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        LinkedIn
+      </a>
+    </div>
+  </main>
+</div>
+
+<script>
+// Remove no-js class if JavaScript is enabled
+document.documentElement.classList.remove('no-js');
+
+// Show loading state initially
+document.body.classList.add('loading');
+
+/* ============================
+   Theme Toggle - VISIBLE BUT DISABLED
+   ============================ */
+(function() {
+  const themeToggle = document.getElementById('themeToggle');
+  
+  // Force dark mode permanently
+  document.documentElement.setAttribute('data-theme', 'dark');
+  
+  // Theme toggle is disabled but shows a message when clicked
+  themeToggle.addEventListener('click', () => {
+    // Simple console message instead of full functionality
+    console.log('Theme toggle: Light mode infrastructure available but currently disabled');
+    
+    // Optional: Show a subtle indicator that it's disabled
+    themeToggle.style.opacity = '0.4';
+    setTimeout(() => {
+      themeToggle.style.opacity = '0.6';
+    }, 300);
+  });
+})();
+
+/* ============================
+   Background Image Loading with Error Handling
+   ============================ */
+(function() {
+  const bgImage = new Image();
+  const startTime = performance.now();
+  
+  bgImage.onload = function() {
+    const loadTime = performance.now() - startTime;
+    console.log(`Background image loaded in ${loadTime.toFixed(2)}ms`);
+    document.body.classList.add('loaded');
+    document.body.classList.remove('loading');
+    
+    // Start background zoom animation
+    startBackgroundZoom();
+  };
+  bgImage.onerror = function() {
+    console.warn('Background image failed to load, using fallback gradient');
+    document.body.classList.remove('loading');
+  };
+  bgImage.src = 'https://i.imgur.com/s44cd43.png';
+})();
+
+/* ============================
+   Background Zoom Animation
+   ============================ */
+function startBackgroundZoom() {
+  let scale = 1;
+  const maxScale = 1.05;
+  const duration = 60000;
+  
+  function animateZoom(timestamp) {
+    if (!startBackgroundZoom.startTime) startBackgroundZoom.startTime = timestamp;
+    
+    const progress = (timestamp - startBackgroundZoom.startTime) / duration;
+    scale = 1 + (maxScale - 1) * Math.min(progress, 1);
+    
+    document.documentElement.style.setProperty('--background-scale', scale);
+    
+    if (progress < 1) {
+      requestAnimationFrame(animateZoom);
+    } else {
+      // Reset and restart
+      startBackgroundZoom.startTime = null;
+      setTimeout(() => {
+        document.documentElement.style.setProperty('--background-scale', 1);
+        setTimeout(() => requestAnimationFrame(animateZoom), 1000);
+      }, 1000);
+    }
+  }
+  
+  requestAnimationFrame(animateZoom);
+}
+
+/* ============================
+   Scroll Progress Indicator
+   ============================ */
+function initScrollProgress() {
+  const scrollProgress = document.getElementById('scrollProgress');
+  
+  window.addEventListener('scroll', () => {
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight - windowHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollPercent = (scrollTop / documentHeight) * 100;
+    
+    scrollProgress.style.width = scrollPercent + '%';
+  });
+}
+
+/* ============================
+   Throttle Utility Function
+   ============================ */
+function throttle(func, limit) {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+}
+
+/* ============================
+   Debounce Utility Function
+   ============================ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/* ============================
+   Dynamic Metrics Simulation
+   ============================ */
+function fetchMetrics() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const commits = Math.floor(Math.random() * 10) + 8;
+      const cost = (Math.random() * 10 + 15).toFixed(2);
+      const deployments = Math.floor(Math.random() * 3) + 2;
+      
+      resolve({
+        commits,
+        cost,
+        deployments
+      });
+    }, 500);
+  });
+}
+
+/* ============================
+   Terminal Canvas — continuous scrolling with throttled metrics
+   ============================ */
+(() => {
+  const canvas = document.getElementById('termCanvas');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  let W=0, H=0, DPR=1;
+  let animationId;
+
+  let metricsUpdateCount = 0;
+  const MAX_METRICS_UPDATES = 5;
+
+  function size() {
+    DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    W = innerWidth; H = innerHeight;
+    canvas.width = W*DPR; canvas.height = H*DPR;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  size(); 
+  addEventListener('resize', throttle(size, 100));
+
+  const STATIC_LINES = [
+    // Infrastructure as Code
+    "$ terraform plan -out=tfplan              # 12 to add, 3 to change, 1 to destroy",
+    "$ terraform apply tfplan                  # Apply complete! Resources: 12 added",
+    "$ terraform workspace new production      # Created and switched to workspace 'production'",
+    "$ terraform state list                    # aws_ecs_service.main, aws_lb.listener...",
+    "$ terraform import aws_s3_bucket.logs logs-bucket  # Import successful",
+    
+    // AWS CLI Operations
+    "$ aws sts get-caller-identity             # arn:aws:iam::123456789:user/devops-admin",
+    "$ aws ec2 describe-instances --filters 'Name=tag:Env,Values=prod'",
+    "$ aws s3 sync ./dist s3://app-bucket/ --delete     # Uploaded 42 files",
+    "$ aws cloudfront create-invalidation --distribution-id ABCD --paths '/*'",
+    "$ aws ecs update-service --cluster main --service api --force-new-deployment",
+    
+    // Kubernetes & Container Operations
+    "$ kubectl get pods -A                      # 18/18 pods ready, 3 nodes",
+    "$ kubectl rollout status deployment/api    # deployment 'api' successfully rolled out",
+    "$ kubectl logs -f deployment/api --tail=50 # [GIN] GET /health - 200",
+    "$ helm upgrade --install api ./charts/api --namespace production",
+    "$ docker build -t api:1.2.3 .             # Successfully built a1b2c3d4e5f6",
+    "$ docker push registry.company.com/api:1.2.3 # Pushed 1.2.3 digest: sha256...",
+    
+    // CI/CD & Pipeline Operations
+    "$ jenkins-job build platform/deploy-prod -p COMMIT=abc123",
+    "$ gitlab-ci-tool trigger pipeline --project-id 42 --ref main",
+    "$ github-actions dispatch workflow deploy-prod --inputs version=1.2.3",
+    "$ argocd app sync production/api           # Sync operation completed",
+    "$ flux reconcile source git platform       # Applied revision: main/abc123",
+    
+    // Monitoring & Observability
+    "$ promtool check rules alert.rules.yml     # SUCCESS: 5 rules found",
+    "$ grafana-cli admin reset-admin-password   # Admin password reset successfully",
+    "$ kubectl top nodes                        # cpu: 45%, memory: 62%",
+    "$ aws cloudwatch get-metric-statistics --namespace AWS/ECS...",
+    
+    // Security & Compliance
+    "$ trivy image registry.company.com/api:1.2.3 # 0 CRITICAL, 2 HIGH vulnerabilities",
+    "$ checkov -d . --quiet                     # Passed checks: 78, Failed checks: 2",
+    "$ aws iam list-attached-user-policies --user-name ci-user",
+    "$ vault read database/creds/app-role       # Successfully fetched credentials",
+    
+    // Database & Storage Operations
+    "$ psql -h db.company.com -U app -d production -c 'SELECT version();'",
+    "$ redis-cli -h cache.company.com INFO memory # used_memory_human: 128.45M",
+    "$ aws rds describe-db-instances --filters 'Name=engine,Values=postgres'",
+    
+    // Network & DNS
+    "$ dig api.company.com +short               # 10.0.1.45, 10.0.2.67",
+    "$ nslookup loadbalancer.company.com        # Non-authoritative answer:",
+    "$ aws route53 list-resource-record-sets --hosted-zone-id Z123456789",
+    
+    // Performance & Debugging
+    "$ kubectl describe pod api-7c6d8f9b4-abc123 # Events: Pulled, Created, Started",
+    "$ strace -p 18429 -c                       # % time seconds calls syscall",
+    "$ tcpdump -i eth0 -c 100 port 80           # Capturing 100 packets",
+    
+    // Selective Quotes
+    "# \"Talk is cheap. Show me the code.\" — Linus Torvalds",
+    "# \"Any sufficiently advanced technology is indistinguishable from magic.\" — Arthur C. Clarke",
+    "# \"First, solve the problem. Then, write the code.\" — John Johnson"
+  ];
+
+  let LINES = [...STATIC_LINES];
+  let metricsLine = "# metrics today: 14 commits, $18.42 cloud cost, 5 deployments";
+
+  // Initialize with metrics
+  LINES.push(metricsLine);
+
+  // Update metrics with throttling
+  const updateMetrics = async () => {
+    if (metricsUpdateCount >= MAX_METRICS_UPDATES) {
+      return;
+    }
+    
+    try {
+      const metrics = await fetchMetrics();
+      metricsLine = `# metrics today: ${metrics.commits} commits, $${metrics.cost} cloud cost, ${metrics.deployments} deployments`;
+      
+      const metricsIndex = LINES.findIndex(line => line.startsWith('# metrics today:'));
+      if (metricsIndex !== -1) {
+        LINES[metricsIndex] = metricsLine;
+      }
+      
+      metricsUpdateCount++;
+      
+      if (metricsUpdateCount < MAX_METRICS_UPDATES) {
+        setTimeout(updateMetrics, 10000);
+      }
+    } catch (error) {
+      console.warn('Failed to fetch metrics:', error);
+    }
+  };
+
+  // Start metrics updates
+  setTimeout(updateMetrics, 10000);
+
+  function nextLine() {
+    return LINES[Math.floor(Math.random()*LINES.length)];
+  }
+
+  const history = [];
+  let typing = { text: nextLine(), shown:"", i:0 };
+  let scrollY = 0;
+  let scrollTarget = 0;
+
+  function startTyping(){
+    typing = { text: nextLine(), shown:"", i:0 };
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = "#f9fafb"; // Always dark mode text
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    ctx.textBaseline = "top";
+
+    const typingY = H - 22;
+    let y = typingY - 20 - history.length*20 - scrollY;
+    for(let i=0;i<history.length;i++){
+      const row=history[i];
+      ctx.globalAlpha = row.startsWith("#") ? 0.6 : 0.5;
+      ctx.fillText(row, 16, y + i*20);
+    }
+    ctx.globalAlpha = typing.text.startsWith("#") ? 0.7 : 0.6;
+    const cursor = (Math.floor(performance.now()/400)%2) ? "▌" : "";
+    ctx.fillText(typing.shown + cursor, 16, typingY);
+    ctx.globalAlpha = 1;
+  }
+
+  let last = performance.now();
+  function loop(now){
+    const dt = now - last; last = now;
+    typing.i += dt/30;
+    if (typing.i >= typing.text.length) {
+      history.push(typing.text);
+      if (history.length > 50) history.shift();
+      scrollTarget += 20;
+      startTyping();
+    }
+    typing.shown = typing.text.slice(0, typing.i);
+    scrollY += (scrollTarget - scrollY) * 0.15;
+    draw();
+    animationId = requestAnimationFrame(loop);
+  }
+  loop(last);
+  
+  return () => {
+    if (animationId) cancelAnimationFrame(animationId);
+  };
+})();
+
+/* ============================
+   Particle Text — white with glow
+   ============================ */
+(() => {
+  const canvas = document.getElementById('nameParticles');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  let W=0,H=0,DPR=1;
+  let animationId;
+  
+  function size(){ 
+    DPR=Math.max(1,Math.min(2,devicePixelRatio||1));
+    W=innerWidth;H=innerHeight;
+    canvas.width=W*DPR;canvas.height=H*DPR;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  size(); 
+  addEventListener('resize', throttle(() => { size(); rebuild(); }, 100));
+
+  const title=document.getElementById('titleText');
+  const off=document.createElement('canvas');
+  const offCtx=off.getContext('2d');
+
+  function rasterize(){
+    const cs=getComputedStyle(title);
+    const font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    off.width=title.offsetWidth+50;
+    off.height=title.offsetHeight+50;
+    offCtx.clearRect(0,0,off.width,off.height);
+    offCtx.font=font;
+    offCtx.fillStyle='#fff';
+    offCtx.textBaseline='top';
+    offCtx.fillText(title.textContent,25,0);
+  }
+
+  class Particle{
+    constructor(x,y){
+      this.baseX=x;
+      this.baseY=y;
+      this.x=x;
+      this.y=y;
+      this.vx=0;
+      this.vy=0;
+      if (window.innerWidth < 520) {
+        this.size = 1;
+      } else if (window.innerWidth < 768) {
+        this.size = 1.2;
+      } else {
+        this.size = 1.5;
+      }
+    }
+    draw(c){
+      c.fillStyle = "rgba(255,255,255,0.85)"; // Always white for dark mode
+      c.shadowColor = "rgba(255,255,255,0.75)";
+      c.shadowBlur=6;
+      c.beginPath();
+      c.arc(this.x,this.y,this.size,0,Math.PI*2);
+      c.fill();
+      c.shadowBlur=0;
+    }
+    update(dt,mx,my){
+      const dx=mx-this.x,dy=my-this.y;
+      const dist=Math.hypot(dx,dy)||1;
+      const R=180;
+      if(dist<R){
+        const f=(R-dist)/R;
+        this.vx+=(-dx/dist)*f*0.24;
+        this.vy+=(-dy/dist)*f*0.24;
+      }
+      this.vx+=(this.baseX-this.x)*0.03;
+      this.vy+=(this.baseY-this.y)*0.03;
+      this.vx*=0.92;this.vy*=0.92;
+      this.x+=this.vx*(dt*0.06);
+      this.y+=this.vy*(dt*0.06);
+    }
+  }
+
+  let particles=[];
+  function rebuild(){
+    rasterize();
+    const img=offCtx.getImageData(0,0,off.width,off.height).data;
+    particles=[];
+    
+    let STEP;
+    if (window.innerWidth < 520) {
+      STEP = 8;
+    } else if (window.innerWidth < 768) {
+      STEP = 6;
+    } else {
+      STEP = 4;
+    }
+    
+    for(let y=0;y<off.height;y+=STEP){
+      for(let x=0;x<off.width;x+=STEP){
+        const a=img[(y*off.width+x)*4+3];
+        if(a>128) particles.push(new Particle(title.offsetLeft+x-25,title.offsetTop+y));
+      }
+    }
+  }
+  
+  document.fonts.ready.then(rebuild);
+  rebuild();
+
+  const mouse={x:-9999,y:-9999};
+  addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+  let last=performance.now();
+  function frame(now){
+    const dt=now-last;last=now;
+    ctx.clearRect(0,0,W,H);
+    for(const p of particles){p.update(dt,mouse.x,mouse.y);p.draw(ctx);}
+    animationId = requestAnimationFrame(frame);
+  }
+  frame(last);
+  
+  return () => {
+    if (animationId) cancelAnimationFrame(animationId);
+  };
+})();
+
+/* ============================
+   Analytics and Performance Monitoring
+   ============================ */
+window.addEventListener('load', function() {
+  const loadTime = performance.now();
+  console.log(`Page loaded in ${loadTime}ms`);
+  
+  // Initialize scroll progress
+  initScrollProgress();
+  
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.btn')) {
+      const btn = e.target.closest('.btn');
+      console.log(`Button clicked: ${btn.textContent.trim()}`);
+    }
+  });
+});
+</script>
+</body>
+</html>
